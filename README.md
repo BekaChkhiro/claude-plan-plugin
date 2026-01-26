@@ -224,6 +224,20 @@ The plugin creates a `PROJECT_PLAN.md` file with:
 - CLI tools
 - Libraries/packages
 
+## 📚 Examples
+
+Want to see what the plugin generates? Check out the `examples/` directory:
+
+- **[Full-Stack App](examples/example-fullstack-plan.md)** - TaskMaster team collaboration tool
+- **[Backend API](examples/example-backend-plan.md)** - E-commerce REST API
+- More examples coming soon!
+
+These examples show:
+- Complete project plans with tasks and architecture
+- Different project types and patterns
+- Progress tracking in action
+- How to structure phases and dependencies
+
 ## ⚙️ Configuration
 
 Currently, the plugin works out of the box with no configuration needed. Future versions will support:
@@ -235,20 +249,31 @@ Currently, the plugin works out of the box with no configuration needed. Future 
 
 ## 🤝 Contributing
 
-Contributions welcome! Please check:
+Contributions are welcome! We appreciate:
+- Bug reports and fixes
+- New templates for different project types
+- Documentation improvements
+- Feature suggestions
+- Code examples
 
+**How to contribute:**
 1. Fork the repository
 2. Create a feature branch
-3. Test with `claude --plugin-dir ./plan-plugin`
-4. Submit a pull request
+3. Make your changes
+4. Test with `claude --plugin-dir ./plan-plugin`
+5. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📝 Development Status
 
-- ✅ **v1.0.0** (In Progress): Core commands, basic wizard, templates
-- 🔜 **v1.1.0** (Planned): GitHub export, codebase analysis
-- 🔜 **v1.2.0** (Planned): Advanced AI skills, custom templates
+Current Version: **v1.0.0** (Release Candidate)
 
-See [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed implementation roadmap.
+- ✅ **v1.0.0**: Core commands, wizard, templates, AI skills
+- 🔜 **v1.1.0**: Multi-language support, custom templates
+- 🔜 **v1.2.0**: Integrations (Jira, Linear), time tracking
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed roadmap.
 
 ## 📄 License
 
