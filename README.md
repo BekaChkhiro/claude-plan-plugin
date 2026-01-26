@@ -13,21 +13,41 @@ Starting a large project can be overwhelming. This plugin solves that by providi
 
 ## 📦 Installation
 
-### Local Development
+### Quick Install (Recommended)
 
 ```bash
-# Clone or download this plugin
-git clone https://github.com/bekolozi/plan-plugin.git
-
-# Use with Claude Code
-claude --plugin-dir ./plan-plugin
+# One-command installation
+curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh | bash
 ```
 
-### From Marketplace (Coming Soon)
+Or download and run:
 
 ```bash
-/plugin install plan
+wget https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh
+chmod +x install.sh
+./install.sh
 ```
+
+### Manual Installation
+
+```bash
+# Clone to plugins directory
+git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/.config/claude/plugins/plan
+
+# Start Claude Code
+claude
+```
+
+### Verification
+
+After installation, start Claude Code and run:
+```
+/plan:new
+```
+
+If the wizard appears, installation was successful!
+
+See [INSTALL.md](INSTALL.md) for detailed installation options and troubleshooting.
 
 ## 🎮 Commands
 
