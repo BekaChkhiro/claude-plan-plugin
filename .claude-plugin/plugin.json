@@ -1,0 +1,17 @@
+{
+  "name": "plan",
+  "description": "Intelligent project planning and task management for software projects. Interactive wizard creates comprehensive plans with tasks, architecture diagrams, and progress tracking.",
+  "version": "1.0.0",
+  "author": {
+    "name": "bekolozi"
+  },
+  "homepage": "https://github.com/bekolozi/plan-plugin",
+  "keywords": [
+    "planning",
+    "project-management",
+    "tasks",
+    "workflow",
+    "productivity",
+    "architecture"
+  ]
+}
