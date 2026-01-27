@@ -16,16 +16,56 @@ No arguments needed - analyzes the entire project state.
 
 ## Process
 
+### Step 0: Load User Language & Translations
+
+**CRITICAL: Execute this step FIRST, before any output!**
+
+Load user's language preference and translation file.
+
+**Pseudo-code:**
+```javascript
+// Read config
+const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
+let language = "en"
+
+if (fileExists(configPath)) {
+  try {
+    const content = readFile(configPath)
+    const config = JSON.parse(content)
+    language = config.language || "en"
+  } catch (error) {
+    language = "en"
+  }
+} else {
+  language = "en"
+}
+
+// Load translations
+const translationPath = `locales/${language}.json`
+const t = JSON.parse(readFile(translationPath))
+```
+
+**Instructions for Claude:**
+
+1. Use Read tool: `~/.config/claude/plan-plugin-config.json`
+2. Get language (default "en")
+3. Use Read tool: `locales/{language}.json`
+4. Store as `t` variable
+
 ### Step 1: Read PROJECT_PLAN.md
 
 Use the Read tool to read PROJECT_PLAN.md from the current working directory.
 
-If file doesn't exist:
+If file doesn't exist, output:
 ```
-❌ Error: PROJECT_PLAN.md not found.
+{t.commands.update.planNotFound}
 
-Please run /plan:new first to create a project plan.
+{t.commands.update.runPlanNew}
 ```
+
+**Example:**
+- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /plan:new first to create a project plan."
+- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /plan:new პროექტის გეგმის შესაქმნელად."
 
 ### Step 2: Parse All Tasks
 
@@ -111,73 +151,197 @@ Also identify 2-3 alternative tasks (next highest scores).
 
 ### Step 6: Generate Recommendation
 
-Display a detailed recommendation:
+Display a detailed recommendation using translations.
 
+**Pseudo-code:**
+```javascript
+const task = recommendedTask
+const complexityText = t.templates.complexity[task.complexity.toLowerCase()]
+// EN: "Low", "Medium", "High"
+// KA: "დაბალი", "საშუალო", "მაღალი"
+
+let output = t.commands.next.title + "\n\n"
+output += t.commands.next.recommendedTask + "\n"
+output += `T${task.id}: ${task.name}\n\n`
+output += t.commands.next.complexity + " " + complexityText + "\n"
+output += t.commands.next.estimated + " " + task.estimated + "\n"
+output += t.commands.next.phase + " " + task.phase + "\n\n"
+output += t.commands.next.dependenciesCompleted + "\n\n"
+output += t.commands.next.whyThisTask + "\n"
+output += reasons.map(r => "• " + r).join("\n") + "\n\n"
+output += t.commands.next.taskDetails + "\n"
+output += task.description + "\n\n"
+output += t.commands.next.readyToStart + "\n"
+output += `/plan:update T${task.id} start\n\n`
+output += "─".repeat(60) + "\n\n"
+output += t.commands.next.alternatives + "\n\n"
+output += alternatives.map((alt, i) =>
+  `${i+1}. T${alt.id}: ${alt.name} - ${alt.complexity} - ${alt.estimated}`
+).join("\n")
+```
+
+**Example output (English):**
 ```
 🎯 Recommended Next Task
 
-╔══════════════════════════════════════════════════════════╗
-║  T[X].[Y]: [Task Name]                                   ║
-║  ────────────────────────────────────────────────────    ║
-║  📊 Complexity: [Low/Medium/High]                        ║
-║  ⏱️  Estimated: [X] hours                                ║
-║  📅 Phase: [N] - [Phase Name]                            ║
-╚══════════════════════════════════════════════════════════╝
+T1.2: Database Setup
 
-✅ All dependencies completed:
-   [List completed dependency tasks or "No dependencies"]
+Complexity: Medium
+Estimated: 4 hours
+Phase: 1 - Foundation
+
+✅ All dependencies completed
 
 🎯 Why this task?
-   • [Reason 1: e.g., "Unlocks 3 other tasks"]
-   • [Reason 2: e.g., "Critical for Phase 2 progress"]
-   • [Reason 3: e.g., "Good momentum builder after complex task"]
+• Unlocks 3 other tasks
+• Critical for Phase 2 progress
+• Good complexity balance after previous task
 
 📝 Task Details:
-   [Show task description from plan]
+Configure PostgreSQL database with connection pooling
+and initial schema setup...
 
-🚀 Ready to start?
-   /plan:update T[X].[Y] start
+Ready to start?
+/plan:update T1.2 start
 
 ────────────────────────────────────────────────────────────
 
 💡 Alternative Tasks (if this doesn't fit):
 
-1. T[A].[B]: [Name] - [Complexity] - [X]h
-   → [Brief reason]
-
-2. T[C].[D]: [Name] - [Complexity] - [X]h
-   → [Brief reason]
+1. T1.3: Authentication Setup - High - 6 hours
+2. T2.1: API Endpoints - Medium - 5 hours
 ```
+
+**Example output (Georgian):**
+```
+🎯 რეკომენდებული შემდეგი ამოცანა
+
+T1.2: მონაცემთა ბაზის დაყენება
+
+სირთულე: საშუალო
+შეფასებული: 4 საათი
+ეტაპი: 1 - საფუძველი
+
+✅ ყველა დამოკიდებულება დასრულდა
+
+🎯 რატომ ეს ამოცანა?
+• ხსნის 3 სხვა ამოცანას
+• კრიტიკული მე-2 ეტაპის პროგრესისთვის
+• კარგი სირთულის ბალანსი წინა ამოცანის შემდეგ
+
+📝 ამოცანის დეტალები:
+PostgreSQL-ის დაყენება connection pooling-ით
+და საწყისი სქემის დაყენებით...
+
+მზად ხართ დასაწყებად?
+/plan:update T1.2 start
+
+────────────────────────────────────────────────────────────
+
+💡 ალტერნატიული ამოცანები (თუ ეს არ გიხდებათ):
+
+1. T1.3: ავთენტიფიკაციის დაყენება - მაღალი - 6 საათი
+2. T2.1: API Endpoints - საშუალო - 5 საათი
+```
+
+**Instructions for Claude:**
+
+Use translation keys for all output:
+- Title: `t.commands.next.title`
+- Recommended task: `t.commands.next.recommendedTask`
+- Complexity: `t.commands.next.complexity` + `t.templates.complexity.{low/medium/high}`
+- Estimated: `t.commands.next.estimated`
+- Phase: `t.commands.next.phase`
+- Dependencies: `t.commands.next.dependenciesCompleted`
+- Why: `t.commands.next.whyThisTask`
+- Details: `t.commands.next.taskDetails`
+- Ready: `t.commands.next.readyToStart`
+- Alternatives: `t.commands.next.alternatives`
 
 ### Step 7: Handle Special Cases
 
 #### Case 1: No Available Tasks (All Blocked or Waiting)
 
+**Pseudo-code:**
+```javascript
+let output = t.commands.next.noTasks + "\n\n"
+output += t.commands.next.projectStatus + "\n"
+output += t.commands.next.completed + " " + completedCount + "/" + totalCount + "\n"
+output += t.commands.next.inProgress + " " + inProgressCount + "\n"
+output += t.commands.next.blocked + " " + blockedCount + "\n"
+output += t.commands.next.waitingOnDeps + " " + waitingCount + "\n\n"
+
+if (inProgressTasks.length > 0) {
+  output += t.commands.next.tasksInProgress + "\n"
+  output += inProgressTasks.map(t => `   ${t.id}: ${t.name}`).join("\n") + "\n\n"
+}
+
+if (blockedTasks.length > 0) {
+  output += t.commands.next.blockedTasks + "\n"
+  output += blockedTasks.map(t => `   ${t.id}: ${t.name}`).join("\n") + "\n\n"
+}
+
+output += t.commands.next.suggestedActions + "\n"
+output += "1. " + t.commands.next.completeInProgress + "\n"
+output += "2. " + t.commands.next.resolveBlockers + "\n"
+output += "3. " + t.commands.next.reviewDependencies
+```
+
+**Example output (English):**
 ```
 ⚠️ No tasks currently available to work on.
 
 📊 Project Status:
-   ✅ Completed: [X]/[Total] tasks
-   🔄 In Progress: [Y] tasks
-   🚫 Blocked: [Z] tasks
-   ⏳ Waiting on Dependencies: [W] tasks
+✅ Completed: 5/18
+🔄 In Progress: 2
+🚫 Blocked: 1
+⏳ Waiting on Dependencies: 10
 
 🔄 Tasks In Progress:
-   [List tasks with IN_PROGRESS status]
+   T1.2: Database Setup
+   T1.3: Authentication
 
 🚫 Blocked Tasks:
-   [List blocked tasks with brief description]
+   T2.1: API Endpoints (waiting on design)
 
 💡 Suggested Actions:
-   1. Complete in-progress tasks
-   2. Resolve blockers on blocked tasks
-   3. Review dependencies if tasks seem stuck
-
-Run /plan:update to update task statuses.
+1. Complete in-progress tasks
+2. Resolve blockers on blocked tasks
+3. Review dependencies if tasks seem stuck
 ```
+
+**Instructions for Claude:**
+
+Use translation keys:
+- `t.commands.next.noTasks`
+- `t.commands.next.projectStatus`
+- `t.commands.next.completed`
+- `t.commands.next.inProgress`
+- `t.commands.next.blocked`
+- `t.commands.next.waitingOnDeps`
+- `t.commands.next.tasksInProgress`
+- `t.commands.next.blockedTasks`
+- `t.commands.next.suggestedActions`
+- `t.commands.next.completeInProgress`
+- `t.commands.next.resolveBlockers`
+- `t.commands.next.reviewDependencies`
 
 #### Case 2: All Tasks Complete
 
+**Pseudo-code:**
+```javascript
+let output = t.commands.next.allComplete + "\n\n"
+output += t.commands.next.projectComplete + "\n\n"
+output += t.commands.next.whatsNext + "\n"
+output += t.commands.next.deploy + "\n"
+output += t.commands.next.postMortem + "\n"
+output += t.commands.next.gatherFeedback + "\n"
+output += t.commands.next.planNextVersion + "\n"
+output += t.commands.next.celebrate + "\n\n"
+output += t.commands.next.greatWork
+```
+
+**Example output (English):**
 ```
 🎉 Congratulations! All tasks are complete!
 

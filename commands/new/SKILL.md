@@ -8,13 +8,72 @@ Create a detailed PROJECT_PLAN.md file by asking users strategic questions about
 
 ## Process
 
+### Step 0: Load User Language & Translations
+
+**CRITICAL: Execute this step FIRST, before any output to the user!**
+
+Load user's language preference and translation file.
+
+**Pseudo-code:**
+```javascript
+// Step 1: Read config
+const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
+let language = "en"
+
+if (fileExists(configPath)) {
+  try {
+    const content = readFile(configPath)
+    const config = JSON.parse(content)
+    language = config.language || "en"
+  } catch (error) {
+    // Corrupted config, use default
+    language = "en"
+  }
+} else {
+  // Config doesn't exist, use default
+  language = "en"
+}
+
+// Step 2: Load translations
+const translationPath = `locales/${language}.json`
+const t = JSON.parse(readFile(translationPath))
+
+// Now ready to use t.commands.new.* for all user-facing text
+```
+
+**Instructions for Claude:**
+
+1. Use Read tool to read config:
+   - file_path: `~/.config/claude/plan-plugin-config.json`
+   - If file exists: Parse JSON, get language (default "en" if missing)
+   - If file doesn't exist: Use default language "en"
+
+2. Use Read tool to load translations:
+   - file_path: `locales/{language}.json`
+   - Parse JSON and store as `t` variable
+
+3. Fall back to English if translation file missing
+
 ### Step 1: Welcome & Overview
 
-Greet the user and explain what you'll do:
-```
-Welcome to the Plan Creation Wizard!
+Greet the user and explain what you'll do using translations:
 
-I'll guide you through creating a comprehensive project plan by asking a series of questions about your project. This will take about 5-10 minutes.
+**Output:**
+```
+{t.commands.new.welcome}
+
+{t.commands.new.intro}
+
+{t.commands.new.whatYouGet}
+
+{t.commands.new.letsStart}
+```
+
+**Example output (English):**
+```
+📋 Welcome to Plan Creation Wizard!
+
+I'll guide you through creating a comprehensive project plan by asking a series of questions. This will take about 5-10 minutes.
 
 At the end, I'll generate a detailed PROJECT_PLAN.md file with:
 - Project architecture diagrams
@@ -26,49 +85,96 @@ At the end, I'll generate a detailed PROJECT_PLAN.md file with:
 Let's get started!
 ```
 
+**Example output (Georgian):**
+```
+📋 მოგესალმებით გეგმის შექმნის Wizard-ში!
+
+მე დაგეხმარებით პროექტის ყოვლისმომცველი გეგმის შექმნაში კითხვების სერიის დასმით. ეს დაახლოებით 5-10 წუთს დასჭირდება.
+
+დასასრულს, მე შევქმნი დეტალურ PROJECT_PLAN.md ფაილს:
+- პროექტის არქიტექტურის დიაგრამებით
+- ტექნოლოგიური სტეკის დაშლით
+- ეტაპობრივი დანერგვის ამოცანებით
+- პროგრესის თვალყურის დევნების სისტემით
+- წარმატების კრიტერიუმებით
+
+მოდით დავიწყოთ!
+```
+
 ### Step 2: Gather Basic Information
 
 Use the AskUserQuestion tool to gather information. Ask questions one at a time or in logical groups.
 
 #### Question Group 1: Project Basics
 
-Ask about:
-1. **Project Name**: What is your project called?
-2. **Project Type**: What type of project are you building?
-   - Options: Full-Stack Web App, Backend API, Frontend SPA, Mobile App, CLI Tool, Library/Package, Other
-3. **Description**: Brief description of what the project does (1-2 sentences)
-4. **Target Users**: Who will use this project?
+Ask about (using translation keys):
+1. **Project Name**: `t.commands.new.projectName`
+2. **Project Type**: `t.commands.new.projectType`
+   - Options from `t.wizard.projectTypes.*`
+3. **Description**: `t.commands.new.description`
+4. **Target Users**: `t.commands.new.targetUsers`
 
-Example using AskUserQuestion:
-```json
-{
-  "questions": [
-    {
-      "question": "What type of project are you building?",
-      "header": "Project Type",
-      "multiSelect": false,
-      "options": [
-        {
-          "label": "Full-Stack Web App",
-          "description": "Complete web application with frontend and backend"
-        },
-        {
-          "label": "Backend API",
-          "description": "REST/GraphQL API server only"
-        },
-        {
-          "label": "Frontend SPA",
-          "description": "Single Page Application (React, Vue, Angular, etc.)"
-        },
-        {
-          "label": "Mobile App",
-          "description": "iOS/Android application"
-        }
-      ]
-    }
-  ]
-}
+Example using AskUserQuestion with translations:
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: t.commands.new.projectType,
+    // EN: "What type of project are you building?"
+    // KA: "რა ტიპის პროექტს აშენებთ?"
+
+    header: t.templates.fields.projectType,
+    // EN: "Project Type"
+    // KA: "პროექტის ტიპი"
+
+    multiSelect: false,
+    options: [
+      {
+        label: t.wizard.projectTypes.fullstack,
+        // EN: "Full-Stack Web App"
+        // KA: "Full-Stack ვებ აპლიკაცია"
+
+        description: t.wizard.projectTypes.fullstackDesc
+        // EN: "Complete web application with frontend and backend"
+        // KA: "სრული ვებ აპლიკაცია frontend-ითა და backend-ით"
+      },
+      {
+        label: t.wizard.projectTypes.backend,
+        description: t.wizard.projectTypes.backendDesc
+      },
+      {
+        label: t.wizard.projectTypes.frontend,
+        description: t.wizard.projectTypes.frontendDesc
+      },
+      {
+        label: t.wizard.projectTypes.mobile,
+        description: t.wizard.projectTypes.mobileDesc
+      },
+      {
+        label: t.wizard.projectTypes.cli,
+        description: t.wizard.projectTypes.cliDesc
+      },
+      {
+        label: t.wizard.projectTypes.library,
+        description: t.wizard.projectTypes.libraryDesc
+      }
+    ]
+  }]
+})
 ```
+
+**All wizard questions should use translation keys:**
+- Project name: `t.commands.new.projectName`
+- Description: `t.commands.new.description`
+- Target users: `t.commands.new.targetUsers`
+- Frontend: `t.commands.new.frontend`
+- Backend: `t.commands.new.backend`
+- Database: `t.commands.new.database`
+- Hosting: `t.commands.new.hosting`
+- Features: `t.commands.new.features`
+- Authentication: `t.commands.new.authentication`
+- Real-time: `t.commands.new.realtime`
+- File uploads: `t.commands.new.fileUploads`
+- Third-party: `t.commands.new.thirdParty`
 
 #### Question Group 2: Tech Stack
 
@@ -252,7 +358,16 @@ Based on features, create MVP criteria:
 
 ### Step 5: Write the File
 
-Use the Write tool to create the PROJECT_PLAN.md file in the current working directory.
+Before writing, show progress message:
+```
+{t.commands.new.generating}
+```
+
+**Example:**
+- EN: "Generating your project plan..."
+- KA: "თქვენი პროექტის გეგმა იქმნება..."
+
+Then use the Write tool to create the PROJECT_PLAN.md file in the current working directory.
 
 ```
 /path/to/project/PROJECT_PLAN.md
@@ -260,12 +375,37 @@ Use the Write tool to create the PROJECT_PLAN.md file in the current working dir
 
 ### Step 6: Confirmation
 
-After creating the file, show the user:
+After creating the file, show the user using translations.
+
+**Pseudo-code:**
+```javascript
+const taskCount = 18  // Total tasks created
+const phaseCount = 4
+
+let output = t.commands.new.success + "\n\n"
+output += t.commands.new.fileCreated + "\n"
+output += t.commands.new.totalTasks.replace("{count}", taskCount) + "\n"
+output += t.commands.new.phases.replace("{count}", phaseCount) + "\n\n"
+output += t.commands.new.nextSteps + "\n"
+output += "1. " + t.commands.new.reviewPlan + "\n"
+output += "2. " + t.commands.new.getNextTask + "\n"
+output += "3. " + t.commands.new.updateProgress + "\n\n"
+output += t.commands.new.planIncludes + "\n"
+output += t.commands.new.architectureDiagrams + "\n"
+output += t.commands.new.techStack + "\n"
+output += t.commands.new.tasksCount.replace("{count}", taskCount) + "\n"
+output += t.commands.new.progressTracking + "\n\n"
+output += t.commands.new.goodLuck
+
+console.log(output)
+```
+
+**Example output (English):**
 ```
 ✅ Project plan created successfully!
 
 📄 File: PROJECT_PLAN.md
-📊 Total Tasks: [X]
+📊 Total Tasks: 18
 🎯 Phases: 4
 
 Next steps:
@@ -274,13 +414,45 @@ Next steps:
 3. Update progress: /plan:update T1.1 start
 
 Your plan includes:
-- Architecture diagrams
-- Detailed tech stack
-- [X] implementation tasks
-- Progress tracking system
+• Architecture diagrams
+• Detailed tech stack
+• 18 implementation tasks
+• Progress tracking system
 
 Good luck with your project! 🚀
 ```
+
+**Example output (Georgian):**
+```
+✅ პროექტის გეგმა წარმატებით შეიქმნა!
+
+📄 ფაილი: PROJECT_PLAN.md
+📊 სულ ამოცანები: 18
+🎯 ეტაპები: 4
+
+შემდეგი ნაბიჯები:
+1. განიხილეთ გეგმა და საჭიროების შემთხვევაში შეცვალეთ
+2. დაიწყეთ: /plan:next (შემდეგი ამოცანის მისაღებად)
+3. განაახლეთ პროგრესი: /plan:update T1.1 start
+
+თქვენი გეგმა მოიცავს:
+• არქიტექტურის დიაგრამებს
+• დეტალურ ტექნოლოგიურ სტეკს
+• 18 იმპლემენტაციის ამოცანას
+• პროგრესის თვალყურის დევნების სისტემას
+
+წარმატებები თქვენს პროექტში! 🚀
+```
+
+**Instructions for Claude:**
+
+Build the output message using translation keys and parameter replacement:
+- Success: `t.commands.new.success`
+- File created: `t.commands.new.fileCreated`
+- Total tasks: `t.commands.new.totalTasks.replace("{count}", actualTaskCount)`
+- Phases: `t.commands.new.phases.replace("{count}", 4)`
+- Use `t.commands.new.*` for all strings
+- Replace `{count}` placeholders with actual values
 
 ## Important Guidelines
 

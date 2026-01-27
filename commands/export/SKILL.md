@@ -17,17 +17,52 @@ Export tasks and project information from PROJECT_PLAN.md to various formats for
 
 ## Process
 
+### Step 0: Load User Language & Translations
+
+**CRITICAL: Execute this step FIRST, before any output!**
+
+**Pseudo-code:**
+```javascript
+const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
+let language = "en"
+if (fileExists(configPath)) {
+  try {
+    const config = JSON.parse(readFile(configPath))
+    language = config.language || "en"
+  } catch (error) {
+    language = "en"
+  }
+}
+const t = JSON.parse(readFile(`locales/${language}.json`))
+```
+
+**Instructions for Claude:**
+1. Use Read tool: `~/.config/claude/plan-plugin-config.json`
+2. Get language (default "en")
+3. Use Read tool: `locales/{language}.json`
+4. Store as `t`
+
 ### Step 1: Validate Input
 
-Check the export format requested. Supported formats:
-- `github` - Create GitHub Issues using gh CLI
-- `json` - Export to structured JSON file
-- `summary` - Create brief Markdown summary
-- `csv` - Export as CSV (optional)
+Check the export format requested.
 
 If invalid format:
 ```
-❌ Invalid format: [format]
+{t.commands.export.invalidFormat.replace("{format}", userFormat)}
+
+{t.commands.export.formats}
+  {t.commands.export.githubFormat}
+  {t.commands.export.jsonFormat}
+  {t.commands.export.summaryFormat}
+  {t.commands.export.csvFormat}
+
+{t.commands.export.usage}
+{t.commands.export.example}
+```
+
+**Example (English):**
+```
+❌ Invalid format: xml
 
 Supported formats:
   github    - Create GitHub Issues with labels
@@ -36,7 +71,7 @@ Supported formats:
   csv       - Export as CSV
 
 Usage: /plan:export <format>
-Example: /plan:export github
+Example: /plan:export json
 ```
 
 ### Step 2: Read PROJECT_PLAN.md
@@ -45,9 +80,9 @@ Use Read tool to read PROJECT_PLAN.md from current directory.
 
 If not found:
 ```
-❌ Error: PROJECT_PLAN.md not found.
+{t.commands.update.planNotFound}
 
-Please run /plan:new first to create a project plan.
+{t.commands.update.runPlanNew}
 ```
 
 ### Step 3: Parse Project Data
@@ -76,23 +111,22 @@ gh --version
 
 If not installed:
 ```
-❌ GitHub CLI not found.
+{t.commands.export.ghNotFound}
 
-To export to GitHub Issues, install GitHub CLI:
-https://cli.github.com/
-
-Installation:
-  macOS:   brew install gh
-  Linux:   See https://github.com/cli/cli#installation
-  Windows: winget install GitHub.cli
-
-After installing, authenticate:
-  gh auth login
+{t.commands.export.ghInstall}
+{t.commands.export.ghUrl}
 ```
 
 Check if authenticated:
 ```bash
 gh auth status
+```
+
+If not authenticated:
+```
+{t.commands.export.ghNotAuth}
+
+{t.commands.export.ghAuthCommand}
 ```
 
 Check if current directory is a Git repository:
@@ -190,31 +224,50 @@ gh issue comment [T2.3-issue-number] \
 
 #### Progress Report
 
-Show progress as issues are created:
+Show progress as issues are created using translations:
+
+**Pseudo-code:**
+```javascript
+console.log(t.commands.export.creatingIssues)
+
+for (task of tasks) {
+  // Create issue...
+  console.log(t.commands.export.created + " " + task.title + " (#" + issueNumber + ")")
+}
+
+console.log("\n" + t.commands.export.exportSummary)
+console.log(t.commands.export.totalIssues.replace("{count}", totalIssues))
+// List phases...
+
+console.log("\n" + t.commands.export.labelsCreated)
+// List labels...
+
+console.log("\n" + t.commands.export.viewIssues)
+console.log("   gh issue list --label plan-plugin")
+console.log("\n" + t.commands.export.visitUrl)
+console.log("   " + repoURL + "/issues")
+```
+
+**Example output (English):**
 ```
 Creating GitHub Issues...
 
 ✅ Created: [Phase 1] T1.1: Project Setup (#1)
 ✅ Created: [Phase 1] T1.2: Database Setup (#2)
-✅ Created: [Phase 1] T1.3: Authentication (#3)
 ...
 
 📊 Export Summary:
-   • Total Issues Created: [X]
-   • Phase 1: [A] issues
-   • Phase 2: [B] issues
-   • Phase 3: [C] issues
-   • Phase 4: [D] issues
+• Total Issues Created: 18
 
-🏷️  Labels Created:
-   • phase-1, phase-2, phase-3, phase-4
-   • complexity-low, complexity-medium, complexity-high
-   • status-todo, status-in-progress, status-done, status-blocked
+🏷️ Labels Created:
+• phase-1, phase-2, phase-3, phase-4
+• complexity-low, complexity-medium, complexity-high
 
 🔗 View all issues:
    gh issue list --label plan-plugin
 
-Or visit: [GitHub repo URL]/issues
+Or visit:
+   https://github.com/user/repo/issues
 ```
 
 ---
@@ -276,24 +329,45 @@ Or visit: [GitHub repo URL]/issues
 
 ### Create JSON File
 
-Use Write tool to create `project-plan.json`:
+Use Write tool to create `project-plan.json`.
 
+**Pseudo-code:**
+```javascript
+const filename = "project-plan.json"
+// Write JSON file...
+
+console.log(t.commands.export.writingJson)
+console.log("\n" + t.commands.export.exportedTo.replace("{filename}", filename))
+console.log("\n" + t.commands.export.exportDetails)
+console.log(t.commands.export.project.replace("{name}", projectName))
+console.log(t.commands.export.tasks.replace("{count}", taskCount))
+console.log(t.commands.export.phases.replace("{count}", phaseCount))
+console.log(t.commands.export.format.replace("{format}", "JSON"))
+console.log("\n" + t.commands.export.useFor)
+console.log(t.commands.export.customIntegrations)
+console.log(t.commands.export.dataAnalysis)
+console.log(t.commands.export.importingTools)
+console.log(t.commands.export.versionControl)
+console.log("\n" + t.commands.export.viewFile.replace("{filename}", filename))
+```
+
+**Example output (English):**
 ```
 Writing JSON export...
 
 ✅ Exported to: project-plan.json
 
 📊 Export Details:
-   • Project: [Name]
-   • Tasks: [X] total
-   • Phases: [N]
-   • Format: JSON
+• Project: Task Manager
+• Tasks: 18 total
+• Phases: 4
+• Format: JSON
 
 💡 Use this file for:
-   • Custom integrations
-   • Data analysis
-   • Importing into other tools
-   • Version control tracking
+• Custom integrations
+• Data analysis
+• Importing into other tools
+• Version control tracking
 
 View file: cat project-plan.json
 ```

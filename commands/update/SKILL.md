@@ -17,6 +17,42 @@ Update the status of tasks in PROJECT_PLAN.md, recalculate progress percentages,
 
 ## Process
 
+### Step 0: Load User Language & Translations
+
+**CRITICAL: Execute this step FIRST, before any output!**
+
+Load user's language preference and translation file.
+
+**Pseudo-code:**
+```javascript
+// Read config
+const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
+let language = "en"
+
+if (fileExists(configPath)) {
+  try {
+    const content = readFile(configPath)
+    const config = JSON.parse(content)
+    language = config.language || "en"
+  } catch (error) {
+    language = "en"
+  }
+} else {
+  language = "en"
+}
+
+// Load translations
+const translationPath = `locales/${language}.json`
+const t = JSON.parse(readFile(translationPath))
+```
+
+**Instructions for Claude:**
+
+1. Use Read tool: `~/.config/claude/plan-plugin-config.json`
+2. Get language (default "en")
+3. Use Read tool: `locales/{language}.json`
+4. Store as `t` variable
+
 ### Step 1: Validate Inputs
 
 Check that the user provided:
@@ -24,6 +60,18 @@ Check that the user provided:
 2. Action: `start`, `done`, or `block`
 
 If missing, show usage:
+```
+{t.commands.update.usage}
+
+{t.commands.update.actions}
+  {t.commands.update.startAction}
+  {t.commands.update.doneAction}
+  {t.commands.update.blockAction}
+
+{t.commands.update.example}
+```
+
+**Example output (English):**
 ```
 Usage: /plan:update <task-id> <action>
 
@@ -35,16 +83,32 @@ Actions:
 Example: /plan:update T1.1 start
 ```
 
+**Example output (Georgian):**
+```
+გამოყენება: /plan:update <task-id> <action>
+
+მოქმედებები:
+  start  - მონიშნე ამოცანა როგორც მიმდინარე (TODO → IN_PROGRESS)
+  done   - მონიშნე ამოცანა როგორც დასრულებული (ANY → DONE)
+  block  - მონიშნე ამოცანა როგორც დაბლოკილი (ANY → BLOCKED)
+
+მაგალითი: /plan:update T1.1 start
+```
+
 ### Step 2: Read PROJECT_PLAN.md
 
 Use the Read tool to read the PROJECT_PLAN.md file from the current working directory.
 
-If file doesn't exist:
+If file doesn't exist, output:
 ```
-❌ Error: PROJECT_PLAN.md not found in current directory.
+{t.commands.update.planNotFound}
 
-Please run /plan:new first to create a project plan.
+{t.commands.update.runPlanNew}
 ```
+
+**Example:**
+- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /plan:new first to create a project plan."
+- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /plan:new პროექტის გეგმის შესაქმნელად."
 
 ### Step 3: Find the Task
 
@@ -69,12 +133,32 @@ or
 
 If task not found:
 ```
-❌ Error: Task [task-id] not found in PROJECT_PLAN.md
+{t.commands.update.taskNotFound.replace("{taskId}", taskId)}
 
-Available tasks:
+{t.commands.update.availableTasks}
 [List first 5-10 task IDs found in the file]
 
+{t.commands.update.checkTasksSection}
+```
+
+**Example output (English):**
+```
+❌ Error: Task T1.5 not found in PROJECT_PLAN.md
+
+Available tasks:
+T1.1, T1.2, T1.3, T1.4, T2.1, T2.2...
+
 Tip: Check the "Tasks & Implementation Plan" section for valid task IDs.
+```
+
+**Example output (Georgian):**
+```
+❌ შეცდომა: ამოცანა T1.5 ვერ მოიძებნა PROJECT_PLAN.md-ში
+
+ხელმისაწვდომი ამოცანები:
+T1.1, T1.2, T1.3, T1.4, T2.1, T2.2...
+
+რჩევა: შეამოწმეთ "ამოცანები და იმპლემენტაციის გეგმა" სექცია ვალიდური task ID-ებისთვის.
 ```
 
 ### Step 4: Update Task Status
@@ -184,28 +268,91 @@ Use the Edit tool to apply all changes to PROJECT_PLAN.md.
 
 ### Step 7: Show Confirmation
 
-Display a success message with updated metrics:
+Display a success message with updated metrics using translations.
 
+**Pseudo-code:**
+```javascript
+const action = userAction  // "start", "done", or "block"
+let statusMessage
+
+if (action === "start") {
+  statusMessage = t.commands.update.taskStarted.replace("{taskId}", taskId)
+} else if (action === "done") {
+  statusMessage = t.commands.update.taskCompleted.replace("{taskId}", taskId)
+} else if (action === "block") {
+  statusMessage = t.commands.update.taskBlocked.replace("{taskId}", taskId)
+}
+
+let output = statusMessage + "\n\n"
+
+// Progress update
+const progressDelta = newProgress - oldProgress
+output += t.commands.update.progressUpdate
+  .replace("{old}", oldProgress)
+  .replace("{new}", newProgress)
+  .replace("{delta}", progressDelta) + "\n\n"
+
+// Overall status
+output += t.commands.update.overallStatus + "\n"
+output += t.commands.update.total + " " + totalTasks + "\n"
+output += t.commands.update.done + " " + doneTasks + "\n"
+output += t.commands.update.inProgress + " " + inProgressTasks + "\n"
+output += t.commands.update.blocked + " " + blockedTasks + "\n"
+output += t.commands.update.remaining + " " + remainingTasks + "\n\n"
+output += progressBar + " " + newProgress + "%\n\n"
+output += t.commands.update.nextSuggestion
 ```
-✅ Task [task-id] updated successfully!
 
-📊 Task Status: [OLD_STATUS] → [NEW_STATUS]
-📈 Progress: [X]% → [Y]% ([+Z]%)
-
-Overall Project Status:
-  Total: [A] tasks
-  ✅ Done: [B]
-  🔄 In Progress: [C]
-  🚫 Blocked: [D]
-  📋 Remaining: [E]
-
-[PROGRESS_BAR] [Y]%
-
-Phase [N] Progress: [P]%
-
-🎯 Next suggested task: T[X].[Y] - [Name]
-   Run: /plan:next (for detailed recommendation)
+**Example output (English):**
 ```
+✅ Task T1.2 completed! 🎉
+
+📊 Progress: 25% → 31% (+6%)
+
+Overall Status:
+Total: 18
+✅ Done: 6
+🔄 In Progress: 1
+🚫 Blocked: 0
+📋 Remaining: 11
+
+🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ 31%
+
+🎯 Next: /plan:next (get recommendation)
+```
+
+**Example output (Georgian):**
+```
+✅ ამოცანა T1.2 დასრულდა! 🎉
+
+📊 პროგრესი: 25% → 31% (+6%)
+
+საერთო სტატუსი:
+სულ: 18
+✅ დასრულებული: 6
+🔄 მიმდინარე: 1
+🚫 დაბლოკილი: 0
+📋 დარჩენილი: 11
+
+🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ 31%
+
+🎯 შემდეგი: /plan:next (რეკომენდაციის მისაღებად)
+```
+
+**Instructions for Claude:**
+
+Use translation keys:
+- Task started: `t.commands.update.taskStarted.replace("{taskId}", actualTaskId)`
+- Task completed: `t.commands.update.taskCompleted.replace("{taskId}", actualTaskId)`
+- Task blocked: `t.commands.update.taskBlocked.replace("{taskId}", actualTaskId)`
+- Progress: `t.commands.update.progressUpdate` with {old}, {new}, {delta} replacements
+- Overall status: `t.commands.update.overallStatus`
+- Total: `t.commands.update.total`
+- Done: `t.commands.update.done`
+- In Progress: `t.commands.update.inProgress`
+- Blocked: `t.commands.update.blocked`
+- Remaining: `t.commands.update.remaining`
+- Next suggestion: `t.commands.update.nextSuggestion`
 
 ## Special Cases
 
@@ -213,32 +360,87 @@ Phase [N] Progress: [P]%
 
 When marking a task as DONE that other tasks depend on, mention it:
 
+**Pseudo-code:**
+```javascript
+let output = t.commands.update.taskCompleted.replace("{taskId}", taskId) + "\n\n"
+
+if (unlockedTasks.length > 0) {
+  output += t.commands.update.unlockedTasks + "\n"
+  output += unlockedTasks.map(t => `  - ${t.id}: ${t.name}`).join("\n")
+}
 ```
-✅ Task T1.2 completed!
+
+**Example output (English):**
+```
+✅ Task T1.2 completed! 🎉
 
 🔓 Unlocked tasks:
   - T1.3: Database Setup
   - T2.1: API Endpoints
+```
 
-These tasks are now ready to start.
+**Example output (Georgian):**
+```
+✅ ამოცანა T1.2 დასრულდა! 🎉
+
+🔓 განბლოკილი ამოცანები:
+  - T1.3: მონაცემთა ბაზის დაყენება
+  - T2.1: API Endpoints
 ```
 
 To detect this, look for tasks that list the completed task in their "Dependencies" field.
 
+**Instructions for Claude:**
+
+Use `t.commands.update.unlockedTasks` when showing unlocked tasks.
+
 ### Blocking a Task
 
-When marking a task as BLOCKED, ask why (optionally):
+When marking a task as BLOCKED, show helpful tip:
 
+**Pseudo-code:**
+```javascript
+let output = t.commands.update.taskBlocked.replace("{taskId}", taskId) + "\n\n"
+output += t.commands.update.tipDocumentBlocker + "\n"
+output += t.commands.update.whatBlocking + "\n"
+output += t.commands.update.whatNeeded + "\n"
+output += t.commands.update.whoCanHelp + "\n\n"
+output += t.commands.update.considerNewTask
 ```
-🚫 Task T2.3 marked as blocked.
+
+**Example output (English):**
+```
+🚫 Task T2.3 marked as blocked
 
 💡 Tip: Document the blocker in the task description:
-   - What is blocking this task?
-   - What needs to happen to unblock it?
-   - Who can help resolve this?
+- What is blocking this task?
+- What needs to happen to unblock it?
+- Who can help resolve this?
 
 Consider creating a new task to resolve the blocker.
 ```
+
+**Example output (Georgian):**
+```
+🚫 ამოცანა T2.3 მონიშნულია როგორც დაბლოკილი
+
+💡 რჩევა: დააფიქსირეთ ბლოკერი ამოცანის აღწერაში:
+- რა აბლოკავს ამ ამოცანას?
+- რა უნდა მოხდეს მისი განსაბლოკად?
+- ვინ შეუძლია დაეხმაროს ამის მოგვარებაში?
+
+განიხილეთ ახალი ამოცანის შექმნა ბლოკერის მოსაგვარებლად.
+```
+
+**Instructions for Claude:**
+
+Use translation keys:
+- `t.commands.update.taskBlocked`
+- `t.commands.update.tipDocumentBlocker`
+- `t.commands.update.whatBlocking`
+- `t.commands.update.whatNeeded`
+- `t.commands.update.whoCanHelp`
+- `t.commands.update.considerNewTask`
 
 ### Completing Final Task
 
