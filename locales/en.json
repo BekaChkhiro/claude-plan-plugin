@@ -186,7 +186,12 @@
       "commandOutputs": "• All command outputs",
       "wizardQuestions": "• Wizard questions",
       "generatedPlans": "• Generated PROJECT_PLAN.md files",
-      "tryIt": "Try it: /plan:new"
+      "tryIt": "Try it: /plan:new",
+      "projectScope": "Project-specific settings saved",
+      "globalScope": "Global settings saved",
+      "projectSettingsRemoved": "Project-specific settings removed",
+      "nowUsing": "Now using",
+      "globalSettingsReset": "Global settings reset to defaults"
     }
   },
 

@@ -2,10 +2,41 @@
 
 როგორ წავიკითხოთ და ჩავწეროთ user configuration SKILL.md ფაილებში.
 
-## 📍 Config File Location
+## 📍 Config File Locations
+
+### Hierarchical Config System (v1.1.1+)
+
+The plugin supports **two levels** of configuration:
+
+1. **Local Project Config** (highest priority)
+   ```
+   ./.plan-config.json
+   ```
+   - Project-specific settings
+   - Overrides global config
+   - Only affects current project
+
+2. **Global User Config** (fallback)
+   ```
+   ~/.config/claude/plan-plugin-config.json
+   ```
+   - User-wide default settings
+   - Used when no local config exists
+   - Affects all projects
+
+3. **Default** (final fallback)
+   ```json
+   { "language": "en" }
+   ```
+
+### Priority Order
 
 ```
-~/.config/claude/plan-plugin-config.json
+Local (./.plan-config.json)
+  ↓ (if not found)
+Global (~/.config/claude/plan-plugin-config.json)
+  ↓ (if not found)
+Default (en)
 ```
 
 ## 📝 Config File Structure
@@ -18,18 +49,18 @@
 }
 ```
 
-## 🔍 Reading Config
+## 🔍 Reading Config (Hierarchical)
 
-### Pseudo-Code for SKILL.md
+### Pseudo-Code for SKILL.md (v1.1.1+)
 
 ```markdown
-## Reading User Configuration
+## Reading User Configuration with Priority
 
-To get user preferences:
+To get user preferences with hierarchical fallback:
 
-1. Check if config file exists at: ~/.config/claude/plan-plugin-config.json
-2. If exists, read and parse JSON
-3. If not exists, use defaults
+1. Check for **local** config: `./.plan-config.json` (project-specific)
+2. If not found, check **global** config: `~/.config/claude/plan-plugin-config.json`
+3. If not found, use **defaults**
 
 Default configuration:
 \`\`\`json
@@ -39,25 +70,48 @@ Default configuration:
 }
 \`\`\`
 
-Example pseudo-code:
+Example pseudo-code (hierarchical):
 \`\`\`javascript
 function getConfig() {
-  const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
+  // Try local config first (project-specific)
+  const localConfigPath = "./.plan-config.json"
 
-  if (fileExists(configPath)) {
-    const content = readFile(configPath)
-    return JSON.parse(content)
-  } else {
-    // Return defaults
-    return {
-      "language": "en",
-      "defaultProjectType": "fullstack"
+  if (fileExists(localConfigPath)) {
+    try {
+      const content = readFile(localConfigPath)
+      const config = JSON.parse(content)
+      config._source = "local"  // Mark source
+      return config
+    } catch (error) {
+      // Corrupted local config, try global
     }
+  }
+
+  // Fall back to global config
+  const globalConfigPath = expandPath("~/.config/claude/plan-plugin-config.json")
+
+  if (fileExists(globalConfigPath)) {
+    try {
+      const content = readFile(globalConfigPath)
+      const config = JSON.parse(content)
+      config._source = "global"  // Mark source
+      return config
+    } catch (error) {
+      // Corrupted global config, use defaults
+    }
+  }
+
+  // Fall back to defaults
+  return {
+    "language": "en",
+    "defaultProjectType": "fullstack",
+    "_source": "default"
   }
 }
 
 const config = getConfig()
-const userLanguage = config.language // "ka" or "en"
+const userLanguage = config.language  // "ka" or "en"
+const configSource = config._source    // "local", "global", or "default"
 \`\`\`
 ```
 

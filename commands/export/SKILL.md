@@ -21,26 +21,44 @@ Export tasks and project information from PROJECT_PLAN.md to various formats for
 
 **CRITICAL: Execute this step FIRST, before any output!**
 
+Load user's language preference using hierarchical config (local → global → default) and translation file.
+
 **Pseudo-code:**
 ```javascript
-const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
-let language = "en"
-if (fileExists(configPath)) {
-  try {
-    const config = JSON.parse(readFile(configPath))
-    language = config.language || "en"
-  } catch (error) {
-    language = "en"
+// Read config with hierarchy (v1.1.1+)
+function getConfig() {
+  // Try local config first
+  if (fileExists("./.plan-config.json")) {
+    try {
+      return JSON.parse(readFile("./.plan-config.json"))
+    } catch (error) {}
   }
+
+  // Fall back to global config
+  const globalPath = expandPath("~/.config/claude/plan-plugin-config.json")
+  if (fileExists(globalPath)) {
+    try {
+      return JSON.parse(readFile(globalPath))
+    } catch (error) {}
+  }
+
+  // Fall back to defaults
+  return { "language": "en" }
 }
+
+const config = getConfig()
+const language = config.language || "en"
+
+// Load translations
 const t = JSON.parse(readFile(`locales/${language}.json`))
 ```
 
 **Instructions for Claude:**
-1. Use Read tool: `~/.config/claude/plan-plugin-config.json`
-2. Get language (default "en")
-3. Use Read tool: `locales/{language}.json`
-4. Store as `t`
+1. Try to read `./.plan-config.json` (local, highest priority)
+2. If not found/corrupted, try `~/.config/claude/plan-plugin-config.json` (global)
+3. If not found/corrupted, use default: `language = "en"`
+4. Use Read tool: `locales/{language}.json`
+5. Store as `t` variable
 
 ### Step 1: Validate Input
 

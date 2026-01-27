@@ -186,7 +186,12 @@
       "commandOutputs": "• ყველა ბრძანების გამოსატანად",
       "wizardQuestions": "• Wizard-ის კითხვებისთვის",
       "generatedPlans": "• დაგენერირებული PROJECT_PLAN.md ფაილებისთვის",
-      "tryIt": "სცადეთ: /plan:new"
+      "tryIt": "სცადეთ: /plan:new",
+      "projectScope": "პროექტ-სპეციფიკური პარამეტრები შენახულია",
+      "globalScope": "გლობალური პარამეტრები შენახულია",
+      "projectSettingsRemoved": "პროექტ-სპეციფიკური პარამეტრები წაიშალა",
+      "nowUsing": "ახლა გამოიყენება",
+      "globalSettingsReset": "გლობალური პარამეტრები საწყის მნიშვნელობებზე დაბრუნდა"
     }
   },
 

@@ -172,10 +172,17 @@ The plugin supports multiple languages for the complete user experience:
 - ✅ Progress tracking and success messages
 
 **How It Works:**
-1. Set your language: `/plan:settings language`
-2. Select your preferred language (English, Georgian, etc.)
-3. All future interactions will use your chosen language
+1. **Global settings**: `/plan:settings language` - Sets language for all projects
+2. **Project-specific settings**: `/plan:settings language --local` - Sets language for current project only
+3. Select your preferred language (English, Georgian, etc.)
 4. Language preference is saved and persists across sessions
+
+**Hierarchical Configuration (v1.1.1+):**
+- **Local** (`./.plan-config.json`) - Project-specific, highest priority
+- **Global** (`~/.config/claude/plan-plugin-config.json`) - User-wide fallback
+- **Default** (English) - Final fallback
+
+This allows you to have different languages for different projects! For example, use Georgian for personal projects and English for work projects.
 
 **Example Georgian Output:**
 ```markdown

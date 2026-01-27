@@ -12,29 +12,51 @@ Create a detailed PROJECT_PLAN.md file by asking users strategic questions about
 
 **CRITICAL: Execute this step FIRST, before any output to the user!**
 
-Load user's language preference and translation file.
+Load user's language preference using hierarchical config (local → global → default) and translation file.
 
 **Pseudo-code:**
 ```javascript
-// Step 1: Read config
-const configPath = expandPath("~/.config/claude/plan-plugin-config.json")
-let language = "en"
+// Read config with hierarchy (v1.1.1+)
+function getConfig() {
+  // Try local config first (project-specific)
+  const localConfigPath = "./.plan-config.json"
 
-if (fileExists(configPath)) {
-  try {
-    const content = readFile(configPath)
-    const config = JSON.parse(content)
-    language = config.language || "en"
-  } catch (error) {
-    // Corrupted config, use default
-    language = "en"
+  if (fileExists(localConfigPath)) {
+    try {
+      const content = readFile(localConfigPath)
+      const config = JSON.parse(content)
+      config._source = "local"
+      return config
+    } catch (error) {
+      // Corrupted local config, try global
+    }
   }
-} else {
-  // Config doesn't exist, use default
-  language = "en"
+
+  // Fall back to global config
+  const globalConfigPath = expandPath("~/.config/claude/plan-plugin-config.json")
+
+  if (fileExists(globalConfigPath)) {
+    try {
+      const content = readFile(globalConfigPath)
+      const config = JSON.parse(content)
+      config._source = "global"
+      return config
+    } catch (error) {
+      // Corrupted global config, use defaults
+    }
+  }
+
+  // Fall back to defaults
+  return {
+    "language": "en",
+    "_source": "default"
+  }
 }
 
-// Step 2: Load translations
+const config = getConfig()
+const language = config.language || "en"
+
+// Load translations
 const translationPath = `locales/${language}.json`
 const t = JSON.parse(readFile(translationPath))
 
@@ -43,16 +65,24 @@ const t = JSON.parse(readFile(translationPath))
 
 **Instructions for Claude:**
 
-1. Use Read tool to read config:
-   - file_path: `~/.config/claude/plan-plugin-config.json`
-   - If file exists: Parse JSON, get language (default "en" if missing)
-   - If file doesn't exist: Use default language "en"
+1. Try to read **local** config first:
+   - file_path: `./.plan-config.json`
+   - If exists and valid: Use this language, mark `_source = "local"`
+   - If doesn't exist or corrupted: Continue to step 2
 
-2. Use Read tool to load translations:
+2. Try to read **global** config:
+   - file_path: `~/.config/claude/plan-plugin-config.json`
+   - If exists and valid: Use this language, mark `_source = "global"`
+   - If doesn't exist or corrupted: Continue to step 3
+
+3. Use **default**:
+   - language = "en", `_source = "default"`
+
+4. Use Read tool to load translations:
    - file_path: `locales/{language}.json`
    - Parse JSON and store as `t` variable
 
-3. Fall back to English if translation file missing
+5. Fall back to English if translation file missing
 
 ### Step 1: Welcome & Overview
 

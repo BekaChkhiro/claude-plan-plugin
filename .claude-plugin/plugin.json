@@ -1,7 +1,7 @@
 {
   "name": "plan",
   "description": "Intelligent project planning and task management for software projects. Interactive wizard creates comprehensive plans with tasks, architecture diagrams, and progress tracking. Supports multiple languages including Georgian.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "bekolozi"
   },

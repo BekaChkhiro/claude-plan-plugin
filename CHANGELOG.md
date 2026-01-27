@@ -199,6 +199,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Mermaid Compatibility** - Diagrams work with Georgian text
 - **Easy Extensibility** - Simple to add new languages
 
+## [1.1.1] - 2026-01-27
+
+### Added
+
+#### Hierarchical Configuration System
+- **Project-specific settings** - Language can now be set per-project
+  - Local config: `./.plan-config.json` (project-specific, highest priority)
+  - Global config: `~/.config/claude/plan-plugin-config.json` (user-wide fallback)
+  - Default: English (final fallback)
+- **`--local` flag** for `/plan:settings language` command
+  - Set language for current project only
+  - Overrides global settings
+  - Allows different languages for different projects
+
+### Changed
+
+#### Updated Commands for Hierarchical Config
+- **All commands** now use hierarchical config reading
+  - `/plan:new` - Checks local → global → default
+  - `/plan:next` - Checks local → global → default
+  - `/plan:update` - Checks local → global → default
+  - `/plan:export` - Checks local → global → default
+  - `/plan:settings` - Shows both local and global configs
+
+#### Enhanced Settings Command
+- **`/plan:settings`** - Now displays hierarchy
+  - Shows active configuration source (local/global/default)
+  - Displays both local and global configs if they exist
+  - Clear indication of which config is being used
+- **`/plan:settings language --local`** - Set project-specific language
+- **`/plan:settings reset --local`** - Remove project-specific settings
+
+### Technical
+
+- **Config Priority**: Local (`./.plan-config.json`) → Global (`~/.config/claude/plan-plugin-config.json`) → Default (`"en"`)
+- **Config Source Tracking**: `_source` field indicates where config came from
+- **Backward Compatible**: Existing global configs continue to work
+- **Translation Keys**: Added 5 new keys for hierarchical config messages
+- **Documentation**: Updated all SKILL.md files with hierarchical config pseudo-code
+
+### Bug Fixes
+
+- Config file corruption now gracefully falls back through hierarchy
+- Missing local config no longer throws errors
+- Empty config files handled properly
+
 ## [Unreleased]
 
 ### Planned for v1.2.0
@@ -223,6 +269,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **1.1.1** (2026-01-27) - Hierarchical configuration system (project-specific settings)
 - **1.1.0** (2026-01-27) - Multi-language support (English, Georgian)
 - **1.0.0** (2026-01-26) - Initial release
 
