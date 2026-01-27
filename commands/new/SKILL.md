@@ -218,13 +218,62 @@ Ask about:
 
 ### Step 3: Process Answers & Select Template
 
-Based on the project type, select the appropriate template:
+Based on the project type and user's language, select the appropriate template.
+
+**Pseudo-code:**
+```javascript
+// Get user language from Step 0
+const language = config.language || "en"  // Already loaded in Step 0
+
+// Determine template based on project type
+let templateName
+if (projectType === "Full-Stack") {
+  templateName = "fullstack.template.md"
+} else if (projectType === "Backend API") {
+  templateName = "backend-api.template.md"
+} else if (projectType === "Frontend SPA") {
+  templateName = "frontend-spa.template.md"
+} else {
+  templateName = "PROJECT_PLAN.template.md"
+}
+
+// Build template path based on language
+let templatePath
+if (language === "ka") {
+  // Use Georgian template
+  templatePath = `templates/ka/${templateName}`
+} else {
+  // Use English template (default)
+  templatePath = `templates/${templateName}`
+}
+
+// Read template
+const template = readFile(templatePath)
+```
+
+**Template paths:**
+
+For English (default):
 - Full-Stack → `templates/fullstack.template.md`
 - Backend API → `templates/backend-api.template.md`
 - Frontend SPA → `templates/frontend-spa.template.md`
 - Other → `templates/PROJECT_PLAN.template.md` (generic)
 
-Read the selected template using the Read tool.
+For Georgian (ka):
+- Full-Stack → `templates/ka/fullstack.template.md`
+- Backend API → `templates/ka/backend-api.template.md`
+- Frontend SPA → `templates/ka/frontend-spa.template.md`
+- Other → `templates/PROJECT_PLAN.template.md` (fallback to English)
+
+**Instructions for Claude:**
+
+1. Determine project type from user's answers
+2. Use the language variable from Step 0 (already loaded)
+3. Build the correct template path:
+   - If language is "ka": use `templates/ka/{template-name}`
+   - Otherwise: use `templates/{template-name}`
+4. Use Read tool to read the template file
+5. If Georgian template doesn't exist, fall back to English template
 
 ### Step 4: Generate Plan Content
 
