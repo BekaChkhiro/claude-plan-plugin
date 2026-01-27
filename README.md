@@ -123,6 +123,85 @@ Export your plan to different formats.
 /plan:export summary       # Markdown summary
 ```
 
+### `/plan:settings` - Plugin Settings
+
+Configure language preferences and other plugin settings.
+
+**Usage:**
+```bash
+/plan:settings              # View current settings
+/plan:settings language     # Change language
+/plan:settings reset        # Reset to defaults
+```
+
+**Supported Languages:**
+- 🇬🇧 English (default)
+- 🇬🇪 ქართული (Georgian)
+- 🇷🇺 Русский (Russian) - coming soon
+
+**Example:**
+```
+You: /plan:settings language
+
+Claude: Select your preferred language:
+○ English
+● ქართული (Georgian) ✓
+○ Русский (Russian)
+
+You: [Select Georgian]
+
+Claude: ✅ პარამეტრები განახლდა!
+ენა შეიცვალა: English → ქართული
+
+ახალი ენა გამოყენებული იქნება:
+• ყველა ბრძანების შედეგებისთვის
+• Wizard-ის კითხვებისთვის
+• გენერირებული PROJECT_PLAN.md ფაილებისთვის
+```
+
+## 🌍 Multi-Language Support
+
+The plugin supports multiple languages for the complete user experience:
+
+**What's Translated:**
+- ✅ All command outputs and messages
+- ✅ Wizard questions and options
+- ✅ Generated PROJECT_PLAN.md files
+- ✅ Task status labels and descriptions
+- ✅ Error messages and help text
+- ✅ Progress tracking and success messages
+
+**How It Works:**
+1. Set your language: `/plan:settings language`
+2. Select your preferred language (English, Georgian, etc.)
+3. All future interactions will use your chosen language
+4. Language preference is saved and persists across sessions
+
+**Example Georgian Output:**
+```markdown
+# MyApp - Full-Stack პროექტის გეგმა
+
+## მიმოხილვა
+
+**პროექტის სახელი**: MyApp
+**სტატუსი**: დაგეგმვა (0% დასრულებული)
+
+## ამოცანები და იმპლემენტაციის გეგმა
+
+### ეტაპი 1: საფუძველი
+
+#### T1.1: პროექტის დაყენება
+- [ ] **სტატუსი**: TODO
+- **სირთულე**: დაბალი
+- **შეფასებული**: 2 საათი
+```
+
+**Technical Details:**
+- UTF-8 encoding for full Unicode support
+- Mermaid diagrams with native language labels
+- No performance impact
+- Easy to add new languages (just add JSON file)
+
 ## 📋 Features
 
 ### ✨ What You Get

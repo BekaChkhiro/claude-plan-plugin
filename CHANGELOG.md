@@ -108,10 +108,101 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Templates: 4 project types + section partials
 - Lines of code: ~5,800
 
+## [1.1.0] - 2026-01-27
+
+### Added
+
+#### Multi-Language Support 🌍
+- **Language Settings Command** - `/plan:settings`
+  - Change language preference
+  - View current configuration
+  - Reset to defaults
+  - Persistent language selection across sessions
+
+- **Georgian Language Support** (ქართული)
+  - Complete translation of all commands
+  - Georgian wizard questions and outputs
+  - Translated PROJECT_PLAN.md templates
+  - Mermaid diagrams with Georgian labels
+  - 250+ translation keys
+
+- **Translation System**
+  - JSON-based translation files (`locales/`)
+  - Language-aware template selection
+  - Parameter replacement in translations
+  - Fallback to English for missing translations
+  - UTF-8 encoding support
+
+- **Georgian Templates**
+  - Full-Stack template in Georgian (`templates/ka/fullstack.template.md`)
+  - Backend API template in Georgian (`templates/ka/backend-api.template.md`)
+  - Frontend SPA template in Georgian (`templates/ka/frontend-spa.template.md`)
+  - Translated section headings and labels
+  - Georgian complexity levels (დაბალი, საშუალო, მაღალი)
+
+#### Configuration System
+- **User Config File** - `~/.config/claude/plan-plugin-config.json`
+  - Stores language preference
+  - Tracks last used date
+  - Extensible for future settings
+  - Automatic directory creation
+  - Graceful error handling
+
+#### Documentation
+- **Multi-Language Guides**
+  - `utils/README.md` - i18n system overview
+  - `utils/config-guide.md` - Configuration usage guide
+  - `utils/i18n-guide.md` - Translation system guide
+  - `TESTING_GUIDE.md` - Comprehensive testing scenarios
+  - `TEST_GEORGIAN.md` - Georgian feature validation
+  - `MULTILANG_ANALYSIS.md` - Implementation analysis
+
+### Changed
+
+#### Commands Updated for i18n
+- **`/plan:new`** - Load language-specific templates
+  - Wizard questions use translations
+  - Generate plans in selected language
+  - Language-aware template selection
+
+- **`/plan:next`** - Translated task recommendations
+  - Complexity labels in user's language
+  - Status indicators translated
+  - Reasoning in user's language
+
+- **`/plan:update`** - Translated progress tracking
+  - Success messages in user's language
+  - Status updates translated
+  - Progress indicators localized
+
+- **`/plan:export`** - Translated export messages
+  - Format validation in user's language
+  - Success confirmations translated
+  - Error messages localized
+
+### Technical
+
+- **Translation Files**: 2 languages (en, ka)
+- **Translation Keys**: 250+ keys
+- **Config System**: Robust error handling
+- **Template Variants**: 3 templates × 2 languages = 6 templates
+- **UTF-8 Support**: Full Unicode compatibility
+- **Performance**: No measurable impact from translations
+- **Lines Added**: ~4,500 lines of translations and documentation
+
+### Features
+
+- **Complete Language Coverage** - All user-facing text translated
+- **Seamless Language Switching** - Change language anytime
+- **Persistent Preferences** - Settings saved across sessions
+- **Native Experience** - Feels like a Georgian app when using Georgian
+- **Mermaid Compatibility** - Diagrams work with Georgian text
+- **Easy Extensibility** - Simple to add new languages
+
 ## [Unreleased]
 
-### Planned for v1.1.0
-- Multi-language support (Georgian, Russian)
+### Planned for v1.2.0
+- Russian language support (Русский)
 - Custom template creation
 - Team templates sharing
 - AI-powered task generation from features
@@ -120,7 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Velocity tracking
 - Sprint planning tools
 
-### Planned for v1.2.0
+### Planned for v1.3.0
 - Real-time collaboration
 - Time tracking integration
 - Calendar integration
@@ -132,6 +223,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **1.1.0** (2026-01-27) - Multi-language support (English, Georgian)
 - **1.0.0** (2026-01-26) - Initial release
 
 ---
