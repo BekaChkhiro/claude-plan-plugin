@@ -66,10 +66,10 @@
 ## Progress Tracking
 
 ### Overall Status
-**Total Tasks**: 25
-**Completed**: 25 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 (100%)
+**Total Tasks**: 61 (25 complete + 36 new)
+**Completed**: 25 🟩🟩🟩🟩🟩░░░░░ (41%)
 **In Progress**: 0
-**TODO**: 0
+**TODO**: 36
 
 ### Phase Progress
 - 🔧 Phase 1: Foundation → 4/4 (100%) ✅
@@ -79,11 +79,18 @@
 - 🧪 Phase 5: Testing & Polish → 2/2 (100%) ✅
 - 🔀 Phase 6: Hybrid Sync → 6/6 (100%) ✅
 - 📚 Phase 7: MCP Documentation → 3/3 (100%) ✅
+- 👥 Phase 8: Team Management → 0/5 (0%) 🆕
+- 📋 Phase 9: Task Assignment → 0/6 (0%) 🆕
+- 💬 Phase 10: Comments & Activity → 0/5 (0%) 🆕
+- 🔔 Phase 11: Notifications → 0/5 (0%) 🆕
+- ⚡ Phase 12: Real-time Features → 0/5 (0%) 🆕
+- 🐙 Phase 13: GitHub Integration → 0/6 (0%) 🆕
+- 📢 Phase 14: External Notifications → 0/4 (0%) 🆕
 
 ### Current Focus
-🎉 **Project Status**: COMPLETE ✨
-📍 **Version**: v1.4.0 Released
-🏁 **All 25 tasks completed across 7 phases**
+📍 **Version**: v1.5.1 (current) → v1.6.0 (planned)
+🎯 **Next Phase**: Phase 8 - Team Management
+⏳ **Waiting For**: PlanFlow Platform Phase 5 completion
 
 ---
 
@@ -930,3 +937,346 @@ Task T1.1: "Setup authentication"
 - [x] Architecture diagram shows Commands + MCP
 - [x] MCP setup guide is complete and clear
 - [x] Examples show natural language usage
+
+---
+
+## Phase 8: Team Management (v1.6.0)
+
+**Goal:** გუნდის მართვის ბრძანებები პლაგინში
+
+**მოთხოვნები:** PlanFlow Platform Phase 5 (Backend Infrastructure) უნდა იყოს დასრულებული
+
+### Tasks
+
+| ID    | Task                                          | Complexity | Status | Dependencies |
+| ----- | --------------------------------------------- | ---------- | ------ | ------------ |
+| T8.1  | Create /team list command                     | Low        | TODO   | Platform T5.1 |
+| T8.2  | Create /team invite command                   | Medium     | TODO   | Platform T5.2 |
+| T8.3  | Create /team remove command                   | Low        | TODO   | T8.1         |
+| T8.4  | Create /team role command                     | Low        | TODO   | Platform T5.3 |
+| T8.5  | Add team translations (en.json, ka.json)      | Low        | TODO   | T8.1         |
+
+**Command Examples:**
+
+```bash
+# გუნდის ნახვა
+/team
+# Output:
+# 👥 Team Members
+#
+#   🟢 John Doe (Owner)      john@company.com
+#      Working on: T2.1 - API endpoints
+#   🟢 Jane Smith (Admin)    jane@company.com
+#      Working on: T3.5 - Dashboard
+#   🔴 Bob Wilson (Editor)   bob@company.com
+#      Last seen: 2 hours ago
+
+# მოწვევა
+/team invite alice@company.com
+/team invite alice@company.com admin
+
+# როლის შეცვლა
+/team role bob@company.com viewer
+
+# წაშლა
+/team remove bob@company.com
+```
+
+---
+
+## Phase 9: Task Assignment (v1.6.0)
+
+**Goal:** ტასკების მინიჭების ბრძანებები
+
+### Tasks
+
+| ID    | Task                                          | Complexity | Status | Dependencies |
+| ----- | --------------------------------------------- | ---------- | ------ | ------------ |
+| T9.1  | Create /assign command                        | Medium     | TODO   | Platform T5.4 |
+| T9.2  | Create /unassign command                      | Low        | TODO   | T9.1         |
+| T9.3  | Create /my-tasks command                      | Low        | TODO   | T9.1         |
+| T9.4  | Create /workload command                      | Medium     | TODO   | T9.1         |
+| T9.5  | Update /next to show assignee                 | Low        | TODO   | T9.1         |
+| T9.6  | Update /update to respect assignments         | Medium     | TODO   | T9.1         |
+
+**Command Examples:**
+
+```bash
+# მინიჭება
+/assign T2.1 jane@company.com
+/assign T2.1 me                    # საკუთარ თავზე
+
+# მოხსნა
+/unassign T2.1
+
+# ჩემი ტასკები
+/my-tasks
+# Output:
+# 📋 My Assigned Tasks (3)
+#
+#   T2.1 - Implement login API    [IN_PROGRESS]  🔴 High
+#   T2.3 - Add validation         [TODO]         🟡 Medium
+#   T3.1 - Create dashboard       [TODO]         🟢 Low
+
+# გუნდის დატვირთვა
+/workload
+# Output:
+# 📊 Team Workload
+#
+#   John   ████████░░  8 tasks (2 in progress)
+#   Jane   ██████░░░░  6 tasks (1 in progress)
+#   Bob    ████░░░░░░  4 tasks (0 in progress)
+#
+#   Unassigned: 12 tasks
+```
+
+---
+
+## Phase 10: Comments & Activity (v1.6.0)
+
+**Goal:** კომენტარები და აქტივობის თვალყურის დევნება
+
+### Tasks
+
+| ID     | Task                                          | Complexity | Status | Dependencies |
+| ------ | --------------------------------------------- | ---------- | ------ | ------------ |
+| T10.1  | Create /comment command                       | Medium     | TODO   | Platform T5.5 |
+| T10.2  | Create /comments command (view)               | Low        | TODO   | T10.1        |
+| T10.3  | Create /activity command                      | Medium     | TODO   | Platform T5.6 |
+| T10.4  | Add @mention support in comments              | Medium     | TODO   | Platform T5.12 |
+| T10.5  | Add reaction support (/react command)         | Low        | TODO   | T10.1        |
+
+**Command Examples:**
+
+```bash
+# კომენტარის დამატება
+/comment T2.1 "API endpoint ready for review"
+/comment T2.1 "@jane please check the validation logic"
+
+# კომენტარების ნახვა
+/comments T2.1
+# Output:
+# 💬 Comments on T2.1 (3)
+#
+#   John (2 hours ago):
+#   "API endpoint ready for review"
+#
+#   Jane (1 hour ago):
+#   "Looks good! Just one small fix needed"
+#   └── John (30 min ago):
+#       "Fixed! Ready for final review"
+
+# აქტივობა
+/activity
+# Output:
+# 📊 Recent Activity
+#
+#   • John marked T2.1 as done (5 min ago)
+#   • Jane commented on T2.3 (10 min ago)
+#   • Bob started working on T3.1 (1 hour ago)
+#   • Jane assigned T2.5 to John (2 hours ago)
+
+/activity T2.1   # კონკრეტული ტასკის აქტივობა
+```
+
+---
+
+## Phase 11: Notifications (v1.6.0)
+
+**Goal:** შეტყობინებების სისტემა პლაგინში
+
+### Tasks
+
+| ID     | Task                                          | Complexity | Status | Dependencies |
+| ------ | --------------------------------------------- | ---------- | ------ | ------------ |
+| T11.1  | Create /notifications command                 | Medium     | TODO   | Platform T5.10 |
+| T11.2  | Add notification badge on startup             | Low        | TODO   | T11.1        |
+| T11.3  | Create /notifications clear command           | Low        | TODO   | T11.1        |
+| T11.4  | Add notification settings (/settings)         | Medium     | TODO   | T11.1        |
+| T11.5  | Update MCP tools with notifications           | Medium     | TODO   | T11.1        |
+
+**Command Examples:**
+
+```bash
+# შეტყობინებების ნახვა
+/notifications
+# Output:
+# 🔔 Notifications (4 unread)
+#
+#   🔴 Jane mentioned you in T2.1 (5 min ago)
+#      "@john please review the changes"
+#
+#   🟡 You were assigned to T3.2 (1 hour ago)
+#      Assigned by: Jane
+#
+#   🟢 T2.3 was completed (2 hours ago)
+#      Completed by: Bob
+#
+#   🟢 New comment on T2.1 (3 hours ago)
+#      Jane: "Looks good!"
+#
+#   [1] Mark all as read  [2] View T2.1
+
+# წაშლა/წაკითხულად მონიშვნა
+/notifications clear
+/notifications clear T2.1   # კონკრეტული ტასკის
+```
+
+---
+
+## Phase 12: Real-time Features (v1.6.0)
+
+**Goal:** WebSocket კავშირი და ლაივ განახლებები
+
+### Tasks
+
+| ID     | Task                                          | Complexity | Status | Dependencies |
+| ------ | --------------------------------------------- | ---------- | ------ | ------------ |
+| T12.1  | Implement WebSocket connection in plugin      | High       | TODO   | Platform T5.7 |
+| T12.2  | Add "Currently Working On" status updates     | Medium     | TODO   | Platform T7.1 |
+| T12.3  | Show live task updates in terminal            | Medium     | TODO   | T12.1        |
+| T12.4  | Add connection status indicator               | Low        | TODO   | T12.1        |
+| T12.5  | Implement offline queue for real-time events  | Medium     | TODO   | T12.1        |
+
+**Real-time Features:**
+
+```bash
+# Claude Code-ში მუშაობისას ავტომატურად:
+# ✅ სტატუსი ახლდება: "Working on T2.1"
+# ✅ გუნდის წევრები ხედავენ real-time
+# ✅ ტასკის ცვლილებები ჩანს მაშინვე
+
+# კავშირის სტატუსი
+# 🟢 Connected to PlanFlow (3 team members online)
+# 🔴 Offline mode - changes will sync when connected
+```
+
+---
+
+## Phase 13: GitHub Integration (v1.6.0)
+
+**Goal:** GitHub ინტეგრაცია პლაგინში
+
+### Tasks
+
+| ID     | Task                                          | Complexity | Status | Dependencies |
+| ------ | --------------------------------------------- | ---------- | ------ | ------------ |
+| T13.1  | Create /github link command                   | Medium     | TODO   | Platform T9.2 |
+| T13.2  | Create /github branch command                 | Medium     | TODO   | T13.1        |
+| T13.3  | Create /github issue command                  | Medium     | TODO   | Platform T9.3 |
+| T13.4  | Create /github pr command                     | Medium     | TODO   | Platform T9.4 |
+| T13.5  | Add auto-complete for task status on PR merge | High       | TODO   | Platform T9.5 |
+| T13.6  | Add GitHub status in /next output             | Low        | TODO   | T13.1        |
+
+**Command Examples:**
+
+```bash
+# რეპოზიტორიის დაკავშირება
+/github link owner/repo
+/github unlink
+
+# ბრანჩის შექმნა ტასკიდან
+/github branch T2.1
+# Creates: feature/T2.1-implement-login
+
+# Issue-ს შექმნა
+/github issue T2.1
+# Creates GitHub Issue with task details
+# Output: Created issue #42: https://github.com/...
+
+# PR-ის გახსნა
+/github pr T2.1
+# Opens browser to create PR with template
+
+# სტატუსის ნახვა
+/github status T2.1
+# Output:
+# 🐙 GitHub Status for T2.1
+#   Branch: feature/T2.1-implement-login
+#   Issue: #42 (open)
+#   PR: #45 (awaiting review)
+```
+
+---
+
+## Phase 14: External Notifications (v1.6.0)
+
+**Goal:** Slack და Discord ინტეგრაცია
+
+### Tasks
+
+| ID     | Task                                          | Complexity | Status | Dependencies |
+| ------ | --------------------------------------------- | ---------- | ------ | ------------ |
+| T14.1  | Create /slack command (webhook setup)         | Medium     | TODO   | Platform T9.7 |
+| T14.2  | Create /discord command (webhook setup)       | Medium     | TODO   | Platform T9.9 |
+| T14.3  | Add notification preferences in /settings     | Medium     | TODO   | T14.1, T14.2 |
+| T14.4  | Test webhooks command                         | Low        | TODO   | T14.1, T14.2 |
+
+**Command Examples:**
+
+```bash
+# Slack ინტეგრაცია
+/slack setup https://hooks.slack.com/...
+/slack test
+/slack disable
+
+# Discord ინტეგრაცია
+/discord setup https://discord.com/api/webhooks/...
+/discord test
+/discord disable
+
+# პარამეტრები
+/settings notifications
+# Output:
+# 🔔 Notification Settings
+#
+#   Email:     ✅ Enabled (daily digest)
+#   Slack:     ✅ Enabled (all events)
+#   Discord:   ❌ Disabled
+#   In-app:    ✅ Enabled
+#
+#   Events:
+#   [✓] Task assigned to me
+#   [✓] Mentioned in comment
+#   [✓] Task I'm watching updated
+#   [ ] All team activity
+```
+
+---
+
+### Team Collaboration Summary (Phases 8-14)
+
+| Phase | Tasks | Focus Area |
+| ----- | ----- | ---------- |
+| Phase 8: Team Management | 5 | /team commands |
+| Phase 9: Task Assignment | 6 | /assign, /workload |
+| Phase 10: Comments & Activity | 5 | /comment, /activity |
+| Phase 11: Notifications | 5 | /notifications |
+| Phase 12: Real-time | 5 | WebSocket, live updates |
+| Phase 13: GitHub Integration | 6 | /github commands |
+| Phase 14: External Notifications | 4 | Slack, Discord |
+| **Total** | **36** | |
+
+**Estimated Duration:** 3-4 weeks
+
+**Dependencies:**
+- PlanFlow Platform Phase 5A must be complete before starting
+- Phase 8E requires Platform Phase 5C (Real-time)
+- Phase 8F requires Platform Phase 5E (GitHub)
+
+---
+
+## Success Criteria (v1.6.0)
+
+- [ ] /team command shows team members and their status
+- [ ] /invite sends team invitations
+- [ ] /assign and /unassign work for task assignment
+- [ ] /my-tasks shows assigned tasks
+- [ ] /workload shows team capacity
+- [ ] /comment adds threaded comments
+- [ ] /activity shows recent team activity
+- [ ] /notifications shows and manages notifications
+- [ ] Real-time status updates work
+- [ ] /github commands integrate with GitHub
+- [ ] Slack/Discord webhooks work
+- [ ] All commands work in English and Georgian
