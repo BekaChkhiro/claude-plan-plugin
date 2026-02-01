@@ -31,7 +31,7 @@ claude --plugin-dir .
 
 **Expected**:
 - [ ] Plugin loads without errors
-- [ ] Commands are available: `/plan:new`, `/plan:update`, `/plan:next`, `/plan:export`
+- [ ] Commands are available: `/new`, `/update`, `/next`, `/export`
 - [ ] No warnings or error messages
 
 **Actual Result**:
@@ -41,10 +41,10 @@ claude --plugin-dir .
 
 ---
 
-### Test 2: `/plan:new` - Full-Stack Project
+### Test 2: `/new` - Full-Stack Project
 
 ```bash
-/plan:new
+/new
 ```
 
 **Test Scenario**: Create a full-stack task management app
@@ -96,13 +96,13 @@ grep "- \[ \]" PROJECT_PLAN.md
 
 ---
 
-### Test 3: `/plan:new` - Backend API Project
+### Test 3: `/new` - Backend API Project
 
 ```bash
 # Clean up previous test
 rm PROJECT_PLAN.md
 
-/plan:new
+/new
 ```
 
 **Test Scenario**: Create a backend API
@@ -129,13 +129,13 @@ rm PROJECT_PLAN.md
 
 ---
 
-### Test 4: `/plan:update` - Task Management
+### Test 4: `/update` - Task Management
 
 Using the PROJECT_PLAN.md from Test 2 or 3:
 
 ```bash
 # Start a task
-/plan:update T1.1 start
+/update T1.1 start
 ```
 
 **Expected**:
@@ -153,7 +153,7 @@ grep "In Progress: 1" PROJECT_PLAN.md
 
 ```bash
 # Complete the task
-/plan:update T1.1 done
+/update T1.1 done
 ```
 
 **Expected**:
@@ -172,7 +172,7 @@ grep "DONE ✅" PROJECT_PLAN.md
 
 ```bash
 # Block a task
-/plan:update T2.1 block
+/update T2.1 block
 ```
 
 **Expected**:
@@ -187,10 +187,10 @@ grep "DONE ✅" PROJECT_PLAN.md
 
 ---
 
-### Test 5: `/plan:next` - Task Recommendation
+### Test 5: `/next` - Task Recommendation
 
 ```bash
-/plan:next
+/next
 ```
 
 **Expected**:
@@ -228,10 +228,10 @@ grep "DONE ✅" PROJECT_PLAN.md
 
 ---
 
-### Test 6: `/plan:export` - JSON Export
+### Test 6: `/export` - JSON Export
 
 ```bash
-/plan:export json
+/export json
 ```
 
 **Expected**:
@@ -261,10 +261,10 @@ node -e "console.log(JSON.parse(require('fs').readFileSync('project-plan.json'))
 
 ---
 
-### Test 7: `/plan:export` - Markdown Summary
+### Test 7: `/export` - Markdown Summary
 
 ```bash
-/plan:export summary
+/export summary
 ```
 
 **Expected**:
@@ -288,7 +288,7 @@ cat PROJECT_SUMMARY.md
 
 ---
 
-### Test 8: `/plan:export` - GitHub Issues (Optional)
+### Test 8: `/export` - GitHub Issues (Optional)
 
 **Prerequisites**: `gh` CLI installed and authenticated
 
@@ -297,7 +297,7 @@ cat PROJECT_SUMMARY.md
 gh --version
 gh auth status
 
-/plan:export github
+/export github
 ```
 
 **Expected**:
@@ -324,16 +324,16 @@ gh auth status
 
 ```bash
 # Missing arguments
-/plan:update
+/update
 
 # Invalid task ID
-/plan:update T99.99 start
+/update T99.99 start
 
 # Invalid action
-/plan:update T1.1 invalid_action
+/update T1.1 invalid_action
 
 # Export invalid format
-/plan:export invalid_format
+/export invalid_format
 ```
 
 **Expected**:
@@ -356,14 +356,14 @@ gh auth status
 rm PROJECT_PLAN.md
 
 # Try commands
-/plan:update T1.1 start
-/plan:next
-/plan:export json
+/update T1.1 start
+/next
+/export json
 ```
 
 **Expected**:
 - [ ] Clear "file not found" message
-- [ ] Suggests running `/plan:new` first
+- [ ] Suggests running `/new` first
 - [ ] No crashes
 
 **Actual Result**:
@@ -406,9 +406,9 @@ Manually test that templates render correctly:
 
 ```bash
 # Create plans with each template type
-/plan:new  # Choose Full-Stack
-/plan:new  # Choose Backend API
-/plan:new  # Choose Frontend SPA
+/new  # Choose Full-Stack
+/new  # Choose Backend API
+/new  # Choose Frontend SPA
 ```
 
 **Expected**:
@@ -459,7 +459,7 @@ grep -r "\](.*)" *.md
 Create a plan with many tasks:
 
 ```bash
-/plan:new
+/new
 # Create project with 50+ tasks
 ```
 

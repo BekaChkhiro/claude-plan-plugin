@@ -164,7 +164,7 @@ Read config: ~/.config/claude/plan-plugin-config.json
        ↓
 Load language: locales/{lang}.json
        ↓
-User runs /plan:new
+User runs /new
        ↓
 Show wizard in selected language
        ↓
@@ -175,14 +175,14 @@ Generate PROJECT_PLAN.md with selected language template
 
 ```bash
 # First time - ask user
-/plan:new
+/new
 > 🌍 Select your language / აირჩიეთ ენა:
   1. English
   2. ქართული
   3. Русский
 
 # Or change anytime
-/plan:settings
+/settings
 > Current language: ქართული
 > Change to: English / Русский
 ```
@@ -388,7 +388,7 @@ t('commands.update.taskCompleted', { taskId: 'T1.1' })
 
 ### Phase 2: Settings Command (1-2 საათი)
 
-#### T2.1: Create /plan:settings Command
+#### T2.1: Create /settings Command
 
 **commands/settings/SKILL.md:**
 ```markdown
@@ -407,7 +407,7 @@ Allow users to:
 
 ### Step 1: Show Current Settings
 
-When user runs `/plan:settings`, display:
+When user runs `/settings`, display:
 
 \`\`\`
 ⚙️ Plan Plugin Settings
@@ -418,13 +418,13 @@ Current Configuration:
   📅 Last Used: 2026-01-26
 
 Available Commands:
-  /plan:settings language    - Change language
-  /plan:settings reset       - Reset to defaults
+  /settings language    - Change language
+  /settings reset       - Reset to defaults
 \`\`\`
 
 ### Step 2: Change Language
 
-When user runs `/plan:settings language`:
+When user runs `/settings language`:
 
 Use AskUserQuestion tool:
 
@@ -475,7 +475,7 @@ The new language will be used for:
   • Wizard questions
   • Generated PROJECT_PLAN.md files
 
-Try it: /plan:new
+Try it: /new
 \`\`\`
 
 ## Important Notes
@@ -489,7 +489,7 @@ Try it: /plan:new
 
 ### Phase 3: Update Commands (4-6 საათი)
 
-#### T3.1: Update /plan:new
+#### T3.1: Update /new
 
 In `commands/new/SKILL.md`, add:
 
@@ -532,15 +532,15 @@ For Georgian:
 \`\`\`
 ```
 
-#### T3.2: Update /plan:next
+#### T3.2: Update /next
 
 Translate output messages using i18n system.
 
-#### T3.3: Update /plan:update
+#### T3.3: Update /update
 
 Translate progress messages.
 
-#### T3.4: Update /plan:export
+#### T3.4: Update /export
 
 Translate export messages.
 
@@ -673,13 +673,13 @@ cp -r templates/sections templates/ka/sections
 ```bash
 # Test 1: Default (English)
 claude
-/plan:new
+/new
 # Should show English
 
 # Test 2: Switch to Georgian
-/plan:settings language
+/settings language
 # Select ქართული
-/plan:new
+/new
 # Should show Georgian
 
 # Test 3: Generated plan
@@ -687,9 +687,9 @@ cat PROJECT_PLAN.md
 # Should be in Georgian
 
 # Test 4: Other commands
-/plan:next
-/plan:update T1.1 start
-/plan:export json
+/next
+/update T1.1 start
+/export json
 # All should be in Georgian
 ```
 
@@ -717,7 +717,7 @@ Create test plans in both languages and verify:
 - Progress messages
 
 ❌ **NO (Keep in English):**
-- Command names (/plan:new, /plan:update)
+- Command names (/new, /update)
 - Task IDs (T1.1, T2.3)
 - File names (PROJECT_PLAN.md)
 - Code/technical terms (React, Express, PostgreSQL)
@@ -760,7 +760,7 @@ Technical terms stay in English!
 ### v1.1.0 - Georgian Language Support
 
 **Features:**
-- ✅ Language selection (/plan:settings)
+- ✅ Language selection (/settings)
 - ✅ Georgian translations
 - ✅ Georgian templates
 - ✅ Persistent language preference
@@ -771,7 +771,7 @@ Technical terms stay in English!
 
 **Migration:**
 - Existing users: No action needed
-- New feature: Run /plan:settings to choose language
+- New feature: Run /settings to choose language
 
 ---
 
@@ -794,7 +794,7 @@ Technical terms stay in English!
 
 Multi-language support is successful when:
 
-1. ✅ User can select language via /plan:settings
+1. ✅ User can select language via /settings
 2. ✅ All commands work in both languages
 3. ✅ Generated plans are fully translated
 4. ✅ No English text appears in Georgian mode (except technical terms)
@@ -814,11 +814,11 @@ Multi-language support is successful when:
 - [ ] Create utils/i18n.js for translations
 
 ### Commands
-- [ ] Create /plan:settings command
-- [ ] Update /plan:new to use i18n
-- [ ] Update /plan:next to use i18n
-- [ ] Update /plan:update to use i18n
-- [ ] Update /plan:export to use i18n
+- [ ] Create /settings command
+- [ ] Update /new to use i18n
+- [ ] Update /next to use i18n
+- [ ] Update /update to use i18n
+- [ ] Update /export to use i18n
 
 ### Templates
 - [ ] Create templates/ka/ directory

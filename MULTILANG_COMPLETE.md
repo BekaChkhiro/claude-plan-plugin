@@ -42,7 +42,7 @@
 **Goal**: Language selection command
 
 **Completed:**
-- ✅ Created `/plan:settings` command
+- ✅ Created `/settings` command
 - ✅ Language selector with AskUserQuestion
 - ✅ Config read/write functionality
 - ✅ Success messages in new language
@@ -66,10 +66,10 @@
 **Goal**: Update all commands to use i18n
 
 **Completed:**
-- ✅ Updated `/plan:new` - wizard questions, success messages
-- ✅ Updated `/plan:next` - task recommendations, alternatives
-- ✅ Updated `/plan:update` - status updates, progress messages
-- ✅ Updated `/plan:export` - format validation, success messages
+- ✅ Updated `/new` - wizard questions, success messages
+- ✅ Updated `/next` - task recommendations, alternatives
+- ✅ Updated `/update` - status updates, progress messages
+- ✅ Updated `/export` - format validation, success messages
 - ✅ Added Step 0 to all commands (load translations)
 - ✅ Parameter replacement working
 - ✅ Fallback to English implemented
@@ -95,7 +95,7 @@
 - ✅ Created `templates/ka/fullstack.template.md`
 - ✅ Created `templates/ka/backend-api.template.md`
 - ✅ Created `templates/ka/frontend-spa.template.md`
-- ✅ Updated `/plan:new` for template selection
+- ✅ Updated `/new` for template selection
 - ✅ Mermaid diagrams with Georgian labels
 - ✅ All section headings translated
 - ✅ Task descriptions in Georgian
@@ -167,7 +167,7 @@
 ## ✨ Features Delivered
 
 ### User-Facing Features
-1. ✅ Language selection command (`/plan:settings`)
+1. ✅ Language selection command (`/settings`)
 2. ✅ Complete Georgian translations (250+ keys)
 3. ✅ Georgian template files (3 templates)
 4. ✅ Mermaid diagrams in Georgian
@@ -407,7 +407,7 @@ Want to add your language? It's easy!
 1. Copy `locales/en.json` to `locales/{code}.json`
 2. Translate all values (keep keys in English)
 3. Create templates in `templates/{code}/`
-4. Test with `/plan:settings language`
+4. Test with `/settings language`
 5. Submit a PR!
 
 See [i18n-guide.md](utils/i18n-guide.md) for details.

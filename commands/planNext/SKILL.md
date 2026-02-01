@@ -9,7 +9,7 @@ Analyze PROJECT_PLAN.md to find the optimal next task based on dependencies, cur
 ## Usage
 
 ```bash
-/plan:next
+/planNext
 ```
 
 No arguments needed - analyzes the entire project state.
@@ -48,6 +48,12 @@ function getConfig() {
 const config = getConfig()
 const language = config.language || "en"
 
+// Cloud config (v1.2.0+)
+const cloudConfig = config.cloud || {}
+const isAuthenticated = !!cloudConfig.apiToken
+const apiUrl = cloudConfig.apiUrl || "https://api.planflow.tools"
+const autoSync = cloudConfig.autoSync || false
+
 // Load translations
 const translationPath = `locales/${language}.json`
 const t = JSON.parse(readFile(translationPath))
@@ -73,8 +79,8 @@ If file doesn't exist, output:
 ```
 
 **Example:**
-- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /plan:new first to create a project plan."
-- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /plan:new პროექტის გეგმის შესაქმნელად."
+- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /planNew first to create a project plan."
+- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /planNew პროექტის გეგმის შესაქმნელად."
 
 ### Step 2: Parse All Tasks
 
@@ -181,7 +187,7 @@ output += reasons.map(r => "• " + r).join("\n") + "\n\n"
 output += t.commands.next.taskDetails + "\n"
 output += task.description + "\n\n"
 output += t.commands.next.readyToStart + "\n"
-output += `/plan:update T${task.id} start\n\n`
+output += `/planUpdate T${task.id} start\n\n`
 output += "─".repeat(60) + "\n\n"
 output += t.commands.next.alternatives + "\n\n"
 output += alternatives.map((alt, i) =>
@@ -211,7 +217,7 @@ Configure PostgreSQL database with connection pooling
 and initial schema setup...
 
 Ready to start?
-/plan:update T1.2 start
+/planUpdate T1.2 start
 
 ────────────────────────────────────────────────────────────
 
@@ -243,7 +249,7 @@ PostgreSQL-ის დაყენება connection pooling-ით
 და საწყისი სქემის დაყენებით...
 
 მზად ხართ დასაწყებად?
-/plan:update T1.2 start
+/planUpdate T1.2 start
 
 ────────────────────────────────────────────────────────────
 

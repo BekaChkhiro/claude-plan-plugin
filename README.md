@@ -6,10 +6,10 @@ Intelligent project planning and task management plugin that helps you start and
 
 Starting a large project can be overwhelming. This plugin solves that by providing:
 
-- **Interactive Project Wizard** (`/plan:new`) - Asks the right questions and generates a comprehensive plan
-- **Smart Task Suggestions** (`/plan:next`) - Tells you exactly what to work on next
-- **Progress Tracking** (`/plan:update`) - Simple checkbox-based progress management
-- **Export Options** (`/plan:export`) - GitHub Issues, JSON, and more
+- **Interactive Project Wizard** (`/planNew`) - Asks the right questions and generates a comprehensive plan
+- **Smart Task Suggestions** (`/planNext`) - Tells you exactly what to work on next
+- **Progress Tracking** (`/planUpdate`) - Simple checkbox-based progress management
+- **Export Options** (`/planExport`) - GitHub Issues, JSON, and more
 
 ## 📦 Installation
 
@@ -42,7 +42,7 @@ claude
 
 After installation, start Claude Code and run:
 ```
-/plan:new
+/planNew
 ```
 
 If the wizard appears, installation was successful!
@@ -51,13 +51,13 @@ See [INSTALL.md](INSTALL.md) for detailed installation options and troubleshooti
 
 ## 🎮 Commands
 
-### `/plan:new` - Create New Project Plan
+### `/planNew` - Create New Project Plan
 
 Interactive wizard that asks about your project and generates a detailed `PROJECT_PLAN.md` file.
 
 **Example:**
 ```
-You: /plan:new
+You: /planNew
 
 Claude: 📋 Let's create your project plan!
 
@@ -76,13 +76,13 @@ You: Team task management with real-time collaboration
    - Progress tracking
 ```
 
-### `/plan:next` - What to Work On Next
+### `/planNext` - What to Work On Next
 
 Analyzes your plan and suggests the next logical task based on dependencies and priorities.
 
 **Example:**
 ```
-You: /plan:next
+You: /planNext
 
 Claude: 🎯 Recommended Next Task:
 
@@ -98,41 +98,331 @@ Claude: 🎯 Recommended Next Task:
   - Critical for Phase 2
   - Good momentum after setup
 
-Ready? /plan:update T2.1 start
+Ready? /planUpdate T2.1 start
 ```
 
-### `/plan:update` - Update Task Status
+### `/planUpdate` - Update Task Status
 
 Mark tasks as started, completed, or blocked.
 
 **Usage:**
 ```bash
-/plan:update T1.1 start    # Mark as in progress
-/plan:update T1.1 done     # Mark as completed
-/plan:update T2.3 block    # Mark as blocked
+/planUpdate T1.1 start    # Mark as in progress
+/planUpdate T1.1 done     # Mark as completed
+/planUpdate T2.3 block    # Mark as blocked
 ```
 
-### `/plan:export` - Export Plan
+### `/planExport` - Export Plan
 
 Export your plan to different formats.
 
 **Usage:**
 ```bash
-/plan:export github        # Create GitHub Issues
-/plan:export json          # Export as JSON
-/plan:export summary       # Markdown summary
+/planExport github        # Create GitHub Issues
+/planExport json          # Export as JSON
+/planExport summary       # Markdown summary
 ```
 
-### `/plan:settings` - Plugin Settings
+### `/planSettings` - Plugin Settings
 
-Configure language preferences and other plugin settings.
+Configure language preferences, auto-sync, and other plugin settings.
 
 **Usage:**
 ```bash
-/plan:settings              # View current settings
-/plan:settings language     # Change language
-/plan:settings reset        # Reset to defaults
+/planSettings              # View current settings
+/planSettings language     # Change language
+/planSettings autoSync     # Show auto-sync status
+/planSettings autoSync on  # Enable auto-sync
+/planSettings autoSync off # Disable auto-sync
+/planSettings reset        # Reset to defaults
 ```
+
+## ☁️ Cloud Features (v1.5.0)
+
+Connect your local plans to PlanFlow Cloud for backup, collaboration, and cross-device access.
+
+**Cloud commands use `pf` prefix to avoid conflicts with Claude commands.**
+
+### `/pfLogin` - Authenticate with PlanFlow
+
+```bash
+/pfLogin                  # Interactive - prompts for token
+/pfLogin pf_abc123...     # Direct token input
+```
+
+Get your API token at: https://planflow.tools/dashboard/settings/tokens
+
+### `/pfSync` - Sync with Cloud
+
+```bash
+/pfSync                   # Show sync status (default)
+/pfSync push              # Upload local → cloud
+/pfSync push --force      # Overwrite cloud without conflict check
+/pfSync pull              # Download cloud → local
+/pfSync pull --force      # Overwrite local without confirmation
+```
+
+### `/pfCloud` - Manage Cloud Projects
+
+```bash
+/pfCloud                  # List all your cloud projects
+/pfCloud link             # Interactive project selection
+/pfCloud link <id>        # Link to specific project
+/pfCloud unlink           # Disconnect from cloud project
+/pfCloud new              # Create new cloud project from local plan
+/pfCloud new "Name"       # Create with custom name
+```
+
+### `/pfWhoami` - Check Authentication Status
+
+```bash
+/pfWhoami                 # Show current user info and cloud stats
+```
+
+### `/pfLogout` - Clear Credentials
+
+```bash
+/pfLogout                 # Clear stored PlanFlow credentials
+```
+
+### Cloud Workflow Example
+
+```bash
+# 1. Authenticate with PlanFlow
+/pfLogin
+
+# 2. Create a project plan
+/planNew
+
+# 3. Create cloud project and sync
+/pfCloud new
+/pfSync push
+
+# 4. Work on tasks
+/planUpdate T1.1 start
+/planUpdate T1.1 done
+
+# 5. Sync progress to cloud
+/pfSync push
+
+# 6. On another device, pull latest
+/pfSync pull
+```
+
+### Auto-Sync Feature
+
+Enable automatic sync after task updates using the settings command:
+
+```bash
+/planSettings autoSync on   # Enable auto-sync
+/planSettings autoSync off  # Disable auto-sync
+/planSettings autoSync      # Check current status
+```
+
+Or manually in config file:
+```json
+// In .plan-config.json or ~/.config/claude/plan-plugin-config.json
+{
+  "cloud": {
+    "autoSync": true
+  }
+}
+```
+
+With auto-sync enabled, running `/planUpdate T1.1 done` will automatically push changes to the cloud.
+
+## 🔀 Hybrid Sync (v1.3.0)
+
+Smart merge system for seamless collaboration - work offline, sync when online, and resolve conflicts intelligently.
+
+### Storage Modes
+
+Configure how your project syncs with the cloud:
+
+```bash
+/planSettings storage local   # Local only, no auto-sync
+/planSettings storage cloud   # Cloud is source of truth
+/planSettings storage hybrid  # Smart merge (recommended)
+```
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| `local` | PROJECT_PLAN.md only, manual sync | Offline work, solo projects |
+| `cloud` | Cloud is authoritative, local is cache | Team collaboration |
+| `hybrid` | Both local and cloud with smart merge | Best of both worlds |
+
+### Smart Merge
+
+When you and a teammate both make changes, Hybrid Sync intelligently merges them:
+
+```
+You update T1.1 → done     Teammate updates T2.3 → done
+        ↓                           ↓
+    ┌───────────────────────────────────────┐
+    │         SMART MERGE                    │
+    │   ✅ Auto-merged (different tasks)    │
+    └───────────────────────────────────────┘
+```
+
+**Auto-merge scenarios:**
+- Different tasks modified → merged automatically
+- Same task, same change → merged automatically
+- Same task, different changes → conflict UI shown
+
+### Conflict Resolution
+
+When conflicts occur, you get a rich diff UI:
+
+```
+⚠️ Conflict Detected!
+
+Task T1.1: "Setup authentication"
+
+┌─────────────────────────────────────────────────────┐
+│ 📍 LOCAL                  │ ☁️ CLOUD                │
+├─────────────────────────────────────────────────────┤
+│ Status: done ✅           │ Status: blocked 🚫      │
+│ Time: 10:00 (30 min ago)  │ Time: 09:30 (1 hr ago)  │
+│ Author: You               │ Author: team@email.com  │
+└─────────────────────────────────────────────────────┘
+
+Which version to keep?
+  1. Keep local (done)
+  2. Keep cloud (blocked)
+  3. Cancel
+```
+
+### Offline Support
+
+Work offline and sync when you're back online:
+
+```bash
+# Working offline
+/planUpdate T1.1 done
+# → Changes saved locally
+# → Queued for sync (1 pending)
+
+# Back online
+/pfSync push
+# → Processing 1 pending changes...
+# → ✅ All changes synced
+```
+
+### Hybrid Workflow Example
+
+```bash
+# 1. Set hybrid mode
+/planSettings storage hybrid
+
+# 2. Work on tasks
+/planUpdate T1.1 done
+# → Local updated + auto-synced to cloud
+
+# 3. Teammate makes changes on cloud...
+
+# 4. Your next update triggers smart merge
+/planUpdate T1.2 done
+# → Pull cloud changes
+# → Smart merge (no conflicts)
+# → Push your changes
+
+# 5. If conflict detected
+# → Shows diff UI
+# → You choose which version to keep
+```
+
+## 🔌 MCP Server (v1.4.0)
+
+Alternative connection method using Model Context Protocol for native Claude integration.
+
+### Two Ways to Connect
+
+| Method | Setup | Best For |
+|--------|-------|----------|
+| **Commands** | Zero setup | Quick start, any terminal |
+| **MCP Server** | npm install | Native AI integration, natural language |
+
+### Commands (Default)
+
+```bash
+/planNext                # Get next task
+/planUpdate T1.1 done    # Update status
+/pfSync push             # Sync to cloud
+```
+
+### MCP Server (Native Integration)
+
+With MCP, you talk to Claude naturally:
+
+```
+You: "What should I work on next?"
+Claude: [calls planflow_task_next] → Shows your next task
+
+You: "Mark T1.1 as done"
+Claude: [calls planflow_task_update] → Updates and syncs
+```
+
+### MCP Installation
+
+```bash
+# Install globally
+npm install -g @planflow-tools/mcp
+
+# Or use npx (no install needed)
+npx @planflow-tools/mcp
+```
+
+### MCP Configuration
+
+**For Claude Desktop** (`~/.config/claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "planflow": {
+      "command": "npx",
+      "args": ["@planflow-tools/mcp"]
+    }
+  }
+}
+```
+
+**For Claude Code** (`.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "planflow": {
+      "command": "npx",
+      "args": ["@planflow-tools/mcp"]
+    }
+  }
+}
+```
+
+### MCP Tools Available
+
+| Tool | Description | Example |
+|------|-------------|---------|
+| `planflow_login` | Authenticate | "Login to PlanFlow with token pf_xxx" |
+| `planflow_projects` | List projects | "Show my PlanFlow projects" |
+| `planflow_task_list` | List tasks | "What tasks do I have?" |
+| `planflow_task_next` | Next task | "What should I work on?" |
+| `planflow_task_update` | Update status | "Mark T1.1 as done" |
+| `planflow_sync` | Sync project | "Sync my project plan" |
+| `planflow_create` | Create project | "Create a new PlanFlow project" |
+
+### MCP vs Commands
+
+**Use Commands when:**
+- Quick one-off operations
+- Working in any terminal
+- Don't want extra setup
+
+**Use MCP when:**
+- Want natural language interaction
+- Using Claude Desktop or Claude Code
+- Prefer conversational workflow
 
 **Supported Languages:**
 - 🇬🇧 English (default)
@@ -141,7 +431,7 @@ Configure language preferences and other plugin settings.
 
 **Example:**
 ```
-You: /plan:settings language
+You: /planSettings language
 
 Claude: Select your preferred language:
 ○ English
@@ -172,8 +462,8 @@ The plugin supports multiple languages for the complete user experience:
 - ✅ Progress tracking and success messages
 
 **How It Works:**
-1. **Global settings**: `/plan:settings language` - Sets language for all projects
-2. **Project-specific settings**: `/plan:settings language --local` - Sets language for current project only
+1. **Global settings**: `/planSettings language` - Sets language for all projects
+2. **Project-specific settings**: `/planSettings language --local` - Sets language for current project only
 3. Select your preferred language (English, Georgian, etc.)
 4. Language preference is saved and persists across sessions
 
@@ -240,19 +530,34 @@ plan-plugin/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin manifest
 ├── commands/
-│   ├── new/                     # /plan:new wizard
-│   ├── next/                    # /plan:next suggestions
-│   ├── update/                  # /plan:update status
-│   └── export/                  # /plan:export formats
+│   ├── planNew/                 # /planNew wizard
+│   ├── planNext/                # /planNext suggestions
+│   ├── planUpdate/              # /planUpdate status
+│   ├── planExport/              # /planExport formats
+│   ├── planSettings/            # /planSettings configuration
+│   ├── planSpec/                # /planSpec analyzer
+│   ├── pfLogin/                 # /pfLogin - PlanFlow authentication
+│   ├── pfLogout/                # /pfLogout - Clear credentials
+│   ├── pfWhoami/                # /pfWhoami - User info
+│   ├── pfSync/                  # /pfSync - Sync with cloud
+│   └── pfCloud/                 # /pfCloud - Manage projects
 ├── skills/
 │   ├── analyze-codebase/        # Codebase analysis
 │   ├── suggest-breakdown/       # Task breakdown
-│   └── estimate-complexity/     # Complexity estimation
+│   ├── estimate-complexity/     # Complexity estimation
+│   ├── api-client/              # HTTP client for cloud API
+│   └── credentials/             # Token management
+├── locales/
+│   ├── en.json                  # English translations
+│   └── ka.json                  # Georgian translations
 ├── templates/
 │   ├── PROJECT_PLAN.template.md
 │   ├── fullstack.template.md
 │   ├── backend-api.template.md
 │   └── frontend-spa.template.md
+├── utils/
+│   ├── config-guide.md          # Configuration documentation
+│   └── i18n-guide.md            # Internationalization guide
 └── README.md
 ```
 
@@ -263,22 +568,22 @@ plan-plugin/
 claude --plugin-dir ./plan-plugin
 
 # 2. Create a new project plan
-/plan:new
+/planNew
 
 # 3. Answer questions about your project
 # (interactive wizard guides you)
 
 # 4. Check what to work on
-/plan:next
+/planNext
 
 # 5. Start working on a task
-/plan:update T1.1 start
+/planUpdate T1.1 start
 
 # 6. Mark it complete when done
-/plan:update T1.1 done
+/planUpdate T1.1 done
 
 # 7. Export to GitHub if needed
-/plan:export github
+/planExport github
 ```
 
 ## 📖 Generated Plan Structure
@@ -346,12 +651,41 @@ These examples show:
 
 ## ⚙️ Configuration
 
-Currently, the plugin works out of the box with no configuration needed. Future versions will support:
+The plugin uses a hierarchical configuration system:
 
-- Custom templates
-- Team-specific defaults
-- Custom phases and workflows
-- Integration preferences
+1. **Local** (`./.plan-config.json`) - Project-specific, highest priority
+2. **Global** (`~/.config/claude/plan-plugin-config.json`) - User-wide fallback
+3. **Default** - Built-in defaults
+
+### Configuration Options
+
+```json
+{
+  "language": "en",
+  "defaultProjectType": "fullstack",
+  "lastUsed": "2026-01-31T12:00:00Z",
+  "cloud": {
+    "apiUrl": "https://api.planflow.tools",
+    "apiToken": "pf_xxx...",
+    "projectId": "uuid-of-linked-project",
+    "userId": "uuid",
+    "userEmail": "user@example.com",
+    "autoSync": false,
+    "lastSyncedAt": "2026-01-31T15:00:00Z"
+  }
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `language` | string | `"en"` | UI language (en, ka) |
+| `defaultProjectType` | string | `"fullstack"` | Default project type |
+| `cloud.apiUrl` | string | `"https://api.planflow.tools"` | API endpoint |
+| `cloud.apiToken` | string | `null` | Your API token |
+| `cloud.projectId` | string | `null` | Linked cloud project |
+| `cloud.autoSync` | boolean | `false` | Auto-sync on task updates |
+
+See [utils/config-guide.md](utils/config-guide.md) for detailed configuration documentation
 
 ## 🤝 Contributing
 
@@ -373,11 +707,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📝 Development Status
 
-Current Version: **v1.0.0** (Release Candidate)
+Current Version: **v1.5.0**
 
 - ✅ **v1.0.0**: Core commands, wizard, templates, AI skills
-- 🔜 **v1.1.0**: Multi-language support, custom templates
-- 🔜 **v1.2.0**: Integrations (Jira, Linear), time tracking
+- ✅ **v1.1.0**: Multi-language support (English, Georgian), hierarchical config
+- ✅ **v1.2.0**: PlanFlow Cloud integration (sync, backup, collaboration)
+- ✅ **v1.3.0**: Hybrid Sync with smart merge, conflict resolution, offline support
+- ✅ **v1.4.0**: MCP Server for native Claude integration (`@planflow-tools/mcp`)
+- ✅ **v1.5.0**: `pf` prefix for cloud commands (`/pfLogin`, `/pfSync`, etc.) - avoids conflicts with Claude
+- 🔜 **v1.6.0**: Integrations (Jira, Linear), time tracking
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed roadmap.
 

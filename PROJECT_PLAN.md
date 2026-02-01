@@ -1,779 +1,932 @@
-# 🚀 Plan Plugin - Implementation Plan
+# PlanFlow Cloud Integration
 
-*Generated: 2026-01-26*
-*Last Updated: 2026-01-26*
+## Overview
 
-## 📋 Overview
-
-**Description**: Claude Code plugin for intelligent project planning and task management. Provides interactive wizard for project initialization, automatic task breakdown, progress tracking, and export capabilities.
-
-**Target Users**: Developers working on medium to large software projects who need structured planning and task management
-
-**Project Type**: Claude Code Plugin (Skills + Commands + Templates)
-
-**Status**: 🟡 Planning → 0% complete
+**Project:** claude-plan-plugin Cloud Integration
+**Goal:** Connect local planning commands to planflow.tools cloud platform
+**Created:** 2026-01-31
+**Status:** Complete ✅
+**Last Updated:** 2026-02-01
+**Current Phase:** Complete - All Phases Done ✅
 
 ---
 
-## 🎯 Problem Statement
+## Architecture
 
-**Current Pain Points:**
-1. Starting large projects is overwhelming - hard to structure everything
-2. Manually creating implementation plans takes 2-3 hours
-3. Separate files for tasks, progress, architecture get out of sync
-4. Unclear what task to work on next
-5. No systematic approach to breaking down features
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                          მომხმარებელი                                │
+└─────────────────────────────────────────────────────────────────────┘
+                    │                           │
+                    ▼                           ▼
+┌───────────────────────────────┐   ┌─────────────────────────────────┐
+│   Method A: Plugin Commands   │   │   Method B: MCP Server          │
+│   ─────────────────────────── │   │   ───────────────────────────── │
+│                               │   │                                 │
+│   /new    /next    /update    │   │   @planflow-tools/mcp           │
+│   /sync   /cloud   /login     │   │   (npm package)                 │
+│                               │   │                                 │
+│   SKILL.md → Bash (curl)      │   │   Native Claude Tools:          │
+│                               │   │   • planflow_task_next          │
+│                               │   │   • planflow_task_update        │
+│                               │   │   • planflow_sync               │
+│                               │   │   • planflow_projects           │
+└───────────────────────────────┘   └─────────────────────────────────┘
+                    │                           │
+                    │     ┌─────────────────┐   │
+                    └────►│ PROJECT_PLAN.md │◄──┘
+                          │    (local)      │
+                          └─────────────────┘
+                                    │
+                                    │ HTTPS (Bearer Token)
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        api.planflow.tools                            │
+│                                                                      │
+│  POST /api-tokens/verify     GET /projects                          │
+│  GET  /auth/me               POST /projects                         │
+│  GET  /projects/:id/plan     PUT /projects/:id/plan                 │
+│  GET  /projects/:id/tasks    PUT /projects/:id/tasks                │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-**Solution:**
-- Single command (`/plan:new`) that runs interactive wizard
-- Auto-generates comprehensive PROJECT_PLAN.md with all details
-- Smart "next task" suggestions based on dependencies
-- Simple progress tracking with checkboxes
-- Optional GitHub Issues export
+### Connection Methods Comparison
+
+| Feature | Commands (Plugin) | MCP Server |
+|---------|-------------------|------------|
+| Setup | Zero (plugin included) | `npm install -g @planflow-tools/mcp` |
+| Usage | `/next`, `/update T1.1 done` | "What's my next task?" |
+| Integration | Any terminal | Claude Desktop/Code native |
+| Offline | ✅ Full support | ✅ Full support |
+| Best for | Quick operations | Natural language workflow |
 
 ---
 
-## 🏗️ Plugin Architecture
+## Progress Tracking
 
-```mermaid
-graph TB
-    subgraph "Commands (Slash Commands)"
-        A[/plan:new]
-        B[/plan:next]
-        C[/plan:update]
-        D[/plan:export]
-    end
+### Overall Status
+**Total Tasks**: 25
+**Completed**: 25 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 (100%)
+**In Progress**: 0
+**TODO**: 0
 
-    subgraph "Skills (AI Capabilities)"
-        E[analyze-codebase]
-        F[suggest-breakdown]
-        G[estimate-complexity]
-    end
+### Phase Progress
+- 🔧 Phase 1: Foundation → 4/4 (100%) ✅
+- 🔐 Phase 2: Authentication → 3/3 (100%) ✅
+- 🔄 Phase 3: Sync Commands → 4/4 (100%) ✅
+- ☁️ Phase 4: Cloud Commands → 3/3 (100%) ✅
+- 🧪 Phase 5: Testing & Polish → 2/2 (100%) ✅
+- 🔀 Phase 6: Hybrid Sync → 6/6 (100%) ✅
+- 📚 Phase 7: MCP Documentation → 3/3 (100%) ✅
 
-    subgraph "Templates"
-        H[PROJECT_PLAN.template.md]
-        I[fullstack.template.md]
-        J[backend.template.md]
-        K[frontend.template.md]
-    end
+### Current Focus
+🎉 **Project Status**: COMPLETE ✨
+📍 **Version**: v1.4.0 Released
+🏁 **All 25 tasks completed across 7 phases**
 
-    subgraph "Output"
-        L[PROJECT_PLAN.md]
-        M[GitHub Issues]
-        N[JSON Export]
-    end
+---
 
-    A --> H
-    A --> I
-    A --> J
-    A --> K
-    B --> E
-    C --> L
-    D --> M
-    D --> N
-    E --> F
-    F --> G
+## Phase 1: Foundation
+
+**Goal:** Set up infrastructure for API communication
+
+---
+
+#### **T1.1**: Config Schema Extension
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: None
+- **აღწერა**:
+  Extend `.plan-config.json` schema to support cloud settings:
+  ```json
+  {
+    "language": "ka",
+    "defaultProjectType": "fullstack",
+    "cloud": {
+      "apiUrl": "https://api.planflow.tools",
+      "apiToken": "pf_xxx...",
+      "userId": "uuid",
+      "userEmail": "user@example.com",
+      "autoSync": false,
+      "lastSyncedAt": null
+    }
+  }
+  ```
+
+**Files to modify:**
+- `utils/config-guide.md` - Document new schema
+- All command SKILL.md files - Update Step 0 to handle cloud config
+
+---
+
+#### **T1.2**: API Client Skill Creation
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T1.1
+- **აღწერა**:
+  Create `skills/api-client/SKILL.md` with:
+  - Base URL configuration
+  - Bearer token authentication
+  - Request/response handling via Bash + curl
+  - Error parsing and user-friendly messages
+  - Retry logic for transient failures
+
+**Endpoints to support:**
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | /api-tokens/verify | Verify token validity |
+| GET | /auth/me | Get current user info |
+| GET | /projects | List user projects |
+| POST | /projects | Create new project |
+| GET | /projects/:id | Get project details |
+| GET | /projects/:id/plan | Get plan content |
+| PUT | /projects/:id/plan | Update plan content |
+| GET | /projects/:id/tasks | List tasks |
+| PUT | /projects/:id/tasks | Bulk update tasks |
+
+---
+
+#### **T1.3**: Translation Keys for Cloud Commands
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: None
+- **აღწერა**:
+  Add translation keys to `locales/en.json` and `locales/ka.json`:
+  ```json
+  {
+    "commands": {
+      "login": {
+        "welcome": "...",
+        "tokenPrompt": "...",
+        "success": "...",
+        "invalidToken": "...",
+        "alreadyLoggedIn": "..."
+      },
+      "logout": { ... },
+      "sync": {
+        "pushing": "...",
+        "pulling": "...",
+        "conflict": "...",
+        "success": "..."
+      },
+      "cloud": {
+        "listProjects": "...",
+        "selectProject": "...",
+        "linkSuccess": "..."
+      }
+    }
+  }
+  ```
+
+---
+
+#### **T1.4**: Credential Storage Utility
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T1.1
+- **აღწერა**:
+  Create `skills/credentials/SKILL.md` for:
+  - Saving token to config (local or global)
+  - Reading token from config
+  - Clearing credentials (logout)
+  - Checking if authenticated
+
+**Storage locations:**
+- Global: `~/.config/claude/plan-plugin-config.json`
+- Local: `./.plan-config.json` (project-specific override)
+
+---
+
+## Phase 2: Authentication Commands
+
+**Goal:** Enable users to authenticate with PlanFlow
+
+---
+
+#### **T2.1**: /login Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T1.2, T1.3, T1.4
+- **აღწერა**:
+  Create `commands/login/SKILL.md`:
+
+**Usage:**
+```bash
+/login                    # Interactive - prompts for token
+/login pf_abc123...       # Direct token input
+/login --global           # Save to global config (default)
+/login --local            # Save to project config only
+```
+
+**Flow:**
+1. Step 0: Load translations
+2. Check if already logged in → show warning
+3. Prompt for token (or use argument)
+4. Call POST /api-tokens/verify
+5. If valid: save credentials, show success
+6. If invalid: show error with link to get token
+
+**Output:**
+```
+✅ Successfully logged in to PlanFlow!
+
+  User:   John Doe
+  Email:  john@example.com
+  Token:  My CLI Token
+
+🎉 You can now use:
+  • /sync     - Sync PROJECT_PLAN.md with cloud
+  • /cloud    - Manage cloud projects
+  • /status   - Check sync status
 ```
 
 ---
 
-## 🛠️ Plugin Structure
+#### **T2.2**: /logout Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T1.4
+- **აღწერა**:
+  Create `commands/logout/SKILL.md`:
 
+**Usage:**
+```bash
+/logout           # Clear credentials
+/logout --local   # Only clear local config
 ```
-plan-plugin/
-├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-│
-├── commands/
-│   ├── new/
-│   │   └── SKILL.md             # Interactive wizard for new projects
-│   ├── next/
-│   │   └── SKILL.md             # Suggest next task
-│   ├── update/
-│   │   └── SKILL.md             # Update task status
-│   └── export/
-│       └── SKILL.md             # Export to GitHub/JSON
-│
-├── skills/
-│   ├── analyze-codebase/
-│   │   └── SKILL.md             # Analyze existing code structure
-│   ├── suggest-breakdown/
-│   │   └── SKILL.md             # Break down high-level tasks
-│   └── estimate-complexity/
-│       └── SKILL.md             # Estimate task complexity & time
-│
-├── templates/
-│   ├── PROJECT_PLAN.template.md    # Main template
-│   ├── fullstack.template.md       # Full-stack specific
-│   ├── backend-api.template.md     # Backend API specific
-│   ├── frontend-spa.template.md    # Frontend SPA specific
-│   └── sections/
-│       ├── overview.md
-│       ├── architecture.md
-│       ├── tech-stack.md
-│       └── tasks.md
-│
-├── utils/
-│   ├── parsers.js                   # Parse PROJECT_PLAN.md
-│   └── github-export.js             # GitHub API integration
-│
-└── README.md
+
+**Flow:**
+1. Step 0: Load translations
+2. Check if logged in → if not, show message
+3. Clear credentials from config
+4. Show success message
+
+---
+
+#### **T2.3**: /whoami Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T1.2, T1.4
+- **აღწერა**:
+  Create `commands/whoami/SKILL.md`:
+
+**Usage:**
+```bash
+/whoami
+```
+
+**Output:**
+```
+👤 Current User
+
+  Name:     John Doe
+  Email:    john@example.com
+  User ID:  550e8400-e29b-...
+  API URL:  https://api.planflow.tools
+  Status:   ✅ Connected
+
+📊 Cloud Stats:
+  Projects: 5
+  Last Sync: 2 hours ago
 ```
 
 ---
 
-## ✨ Core Features
+## Phase 3: Sync Commands
 
-### 🧙 Interactive Wizard (`/plan:new`)
-- Step-by-step questions about project
-- Context-aware follow-up questions
-- Template selection based on project type
-- Automatic architecture diagram generation
-- Tech stack recommendations
-
-### 🎯 Smart Task Management (`/plan:next`)
-- Analyze dependencies
-- Check what's unblocked
-- Consider complexity and current phase
-- Suggest logical next step
-- Show estimated effort
-
-### ✅ Progress Tracking (`/plan:update`)
-- Update task status (TODO → IN_PROGRESS → DONE)
-- Auto-update progress bars
-- Unlock dependent tasks
-- Update timestamps
-- Calculate phase completion
-
-### 📤 Export Capabilities (`/plan:export`)
-- GitHub Issues with labels
-- GitHub Project board setup
-- JSON export for custom tools
-- Markdown summary reports
-
-### 🔍 AI Skills
-- Codebase analysis for existing projects
-- Intelligent task breakdown
-- Complexity estimation
-- Time estimation heuristics
+**Goal:** Enable bidirectional sync between local and cloud
 
 ---
 
-## 📝 Tasks & Implementation Plan
+#### **T3.1**: /sync push Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T2.1, T1.2
+- **აღწერა**:
+  Add to `commands/sync/SKILL.md`:
 
-### 🟢 Phase 1: Foundation (Est: 4-6 hours)
-
-#### **T1.1**: Plugin Structure Setup
-- [x] **Status**: DONE ✅
-- **Complexity**: 🟢 Low
-- **Estimated**: 1 hour
-- **Dependencies**: None
-- **Description**:
-  - Create plugin directory structure
-  - Create `.claude-plugin/plugin.json` manifest
-  - Setup folder structure (commands/, skills/, templates/)
-  - Initialize README.md
-  - Git initialization
-
-**Files to create:**
+**Usage:**
+```bash
+/sync push              # Push local → cloud
+/sync push --force      # Overwrite cloud version
 ```
-plan-plugin/
-├── .claude-plugin/
-│   └── plugin.json
-├── commands/
-├── skills/
-├── templates/
-└── README.md
+
+**Flow:**
+1. Check authentication
+2. Check PROJECT_PLAN.md exists
+3. Check if linked to cloud project (or create new)
+4. Read local plan content
+5. PUT /projects/:id/plan with content
+6. Update lastSyncedAt in config
+7. Show success with stats
+
+---
+
+#### **T3.2**: /sync pull Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T2.1, T1.2
+- **აღწერა**:
+  Add to `commands/sync/SKILL.md`:
+
+**Usage:**
+```bash
+/sync pull              # Pull cloud → local
+/sync pull --force      # Overwrite local version
+```
+
+**Flow:**
+1. Check authentication
+2. Check if linked to cloud project
+3. GET /projects/:id/plan
+4. If local exists: show diff, ask confirmation
+5. Write to PROJECT_PLAN.md
+6. Update lastSyncedAt
+7. Show success
+
+---
+
+#### **T3.3**: /sync status Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T1.2, T1.4
+- **აღწერა**:
+  Add to `commands/sync/SKILL.md`:
+
+**Usage:**
+```bash
+/sync status
+/sync          # Default action = status
+```
+
+**Output:**
+```
+📊 Sync Status
+
+  Local:   PROJECT_PLAN.md (modified 5 min ago)
+  Cloud:   My Project (synced 2 hours ago)
+  Status:  ⚠️ Local changes not synced
+
+  Changes:
+    + 2 tasks completed locally
+    ~ 1 task status changed
+
+  Run /sync push to upload changes
 ```
 
 ---
 
-#### **T1.2**: Plugin Manifest Configuration
-- [ ] **Status**: TODO
-- **Complexity**: 🟢 Low
-- **Estimated**: 30 minutes
-- **Dependencies**: T1.1
-- **Description**:
-  - Define plugin metadata (name, description, version)
-  - Add author information
-  - Setup plugin namespacing
-  - Version: 1.0.0
+#### **T3.4**: Auto-sync on /update
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T3.1
+- **აღწერა**:
+  Modify `commands/update/SKILL.md`:
 
-**File: `.claude-plugin/plugin.json`**
+  After updating local PROJECT_PLAN.md, if:
+  - User is authenticated
+  - Project is linked to cloud
+  - `autoSync: true` in config
+
+  Then automatically sync task status to cloud.
+
+**Config option:**
 ```json
 {
-  "name": "plan",
-  "description": "Intelligent project planning and task management for software projects",
-  "version": "1.0.0",
-  "author": {
-    "name": "Your Name"
-  },
-  "homepage": "https://github.com/yourusername/plan-plugin",
-  "keywords": ["planning", "project-management", "tasks", "workflow"]
+  "cloud": {
+    "autoSync": true
+  }
 }
 ```
 
 ---
 
-#### **T1.3**: Base Template Creation
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T1.1
-- **Description**:
-  - Create main PROJECT_PLAN.template.md
-  - Define all sections structure
-  - Add placeholders for dynamic content
-  - Include Mermaid diagram templates
-  - Add progress tracking formulas
-  - Create section partials (overview, architecture, etc.)
+## Phase 4: Cloud Project Management
 
-**Files to create:**
-```
-templates/
-├── PROJECT_PLAN.template.md
-└── sections/
-    ├── overview.md
-    ├── architecture.md
-    ├── tech-stack.md
-    └── tasks.md
-```
-
-**Template sections:**
-- Overview (name, description, target users, status)
-- Architecture (Mermaid diagrams)
-- Tech Stack (Frontend, Backend, Database, DevOps)
-- Project Structure (folder tree)
-- Tasks by Phase (with checkboxes, complexity, estimates)
-- Progress Tracking (overall %, phase %, current focus)
-- Notes & Decisions
-- Resources
+**Goal:** Manage cloud projects from CLI
 
 ---
 
-#### **T1.4**: Project Type Templates
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 1.5 hours
-- **Dependencies**: T1.3
-- **Description**:
-  - Create fullstack.template.md
-  - Create backend-api.template.md
-  - Create frontend-spa.template.md
-  - Customize tech stack sections for each
-  - Add type-specific architecture diagrams
-  - Add type-specific common tasks
-
-**Files to create:**
-```
-templates/
-├── fullstack.template.md
-├── backend-api.template.md
-└── frontend-spa.template.md
-```
-
----
-
-### 🔵 Phase 2: Core Commands (Est: 8-10 hours)
-
-#### **T2.1**: `/plan:new` Command - Basic Wizard
-- [ ] **Status**: TODO
-- **Complexity**: 🔴 High
-- **Estimated**: 4 hours
-- **Dependencies**: T1.3, T1.4
-- **Description**:
-  - Create interactive wizard command
-  - Implement question flow:
-    1. Basic info (name, description, target users)
-    2. Project type selection
-    3. Tech stack questions
-    4. Core features list
-    5. Architecture preferences
-  - Use AskUserQuestion tool for each step
-  - Store answers in context
-  - Template selection logic based on project type
-
-**File: `commands/new/SKILL.md`**
-
-**Wizard Flow:**
-```
-/plan:new
-  ↓
-Step 1: Basic Info
-  - Project name
-  - Description
-  - Target audience
-  ↓
-Step 2: Project Type
-  - Full-stack / Backend / Frontend / Mobile / CLI
-  ↓
-Step 3: Tech Stack
-  - Frontend framework
-  - Backend framework
-  - Database
-  - Hosting
-  ↓
-Step 4: Core Features
-  - List main features (user input)
-  ↓
-Step 5: Architecture
-  - Monorepo vs separate
-  - Folder structure preference
-  ↓
-Step 6: Generate
-  - Select template
-  - Fill placeholders
-  - Create PROJECT_PLAN.md
-```
-
----
-
-#### **T2.2**: `/plan:new` Command - Template Generation
-- [ ] **Status**: TODO
-- **Complexity**: 🔴 High
-- **Estimated**: 3 hours
-- **Dependencies**: T2.1
-- **Description**:
-  - Process wizard answers
-  - Select appropriate template
-  - Fill all placeholders with user data
-  - Generate Mermaid architecture diagram
-  - Generate folder structure tree
-  - Create initial task breakdown (high-level phases)
-  - Write PROJECT_PLAN.md file
-  - Confirm completion to user
-
-**Template Processing:**
-- Replace `{{PROJECT_NAME}}` with actual name
-- Replace `{{DESCRIPTION}}` with description
-- Generate tech stack section from selections
-- Create features list from user input
-- Generate basic 4 phases: Foundation, Core, Advanced, Polish
-- Create 3-5 high-level tasks per phase
-
----
-
-#### **T2.3**: `/plan:update` Command
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T2.2
-- **Description**:
-  - Read PROJECT_PLAN.md file
-  - Parse task structure
-  - Accept arguments: task-id and status (start/done/block)
-  - Update task checkbox and status
-  - Update timestamps
-  - Recalculate progress percentages
-  - Unlock dependent tasks if needed
-  - Write updated file
-  - Show confirmation message
-
-**File: `commands/update/SKILL.md`**
+#### **T4.1**: /cloud list Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T2.1
+- **აღწერა**:
+  Create `commands/cloud/SKILL.md`:
 
 **Usage:**
 ```bash
-/plan:update T1.1 start    # Mark as in progress
-/plan:update T1.1 done     # Mark as completed
-/plan:update T2.3 block    # Mark as blocked
+/cloud list
+/cloud             # Default action = list
 ```
 
-**Progress Calculation:**
-- Count total tasks
-- Count completed tasks
-- Calculate overall %
-- Calculate per-phase %
-- Update "Current Focus" section
-
----
-
-#### **T2.4**: `/plan:next` Command
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T2.2
-- **Description**:
-  - Read PROJECT_PLAN.md
-  - Parse all tasks and their statuses
-  - Analyze dependencies
-  - Find tasks that are:
-    * Not completed
-    * Not blocked
-    * Dependencies satisfied
-  - Rank by:
-    * Current phase
-    * Critical path (unlocks most tasks)
-    * Complexity (prefer medium after complex)
-  - Suggest best next task with reasoning
-  - Show task details and files involved
-
-**File: `commands/next/SKILL.md`**
-
-**Output format:**
+**Output:**
 ```
-🎯 Recommended Next Task:
+☁️ Your Cloud Projects
 
-╔═══════════════════════════════════╗
-║ T2.1: Task CRUD API              ║
-║ Complexity: Medium                ║
-║ Estimated: 5 hours                ║
-╚═══════════════════════════════════╝
+  ID        Name              Tasks    Progress    Last Updated
+  ────────  ────────────────  ───────  ──────────  ────────────
+  abc123    E-commerce App    24/45    53%         2 hours ago
+  def456    Mobile API        12/18    67%         Yesterday
+  ghi789    Dashboard         8/8      100% ✅     Last week
 
-✅ All dependencies completed
-🎯 Why this task?
-  - Unlocks 3 other tasks
-  - Critical for Phase 2
-  - Good momentum builder
+  📍 Current: abc123 (E-commerce App)
 
-Ready to start? /plan:update T2.1 start
+  💡 Commands:
+    /cloud link <id>     - Link local project
+    /cloud unlink        - Unlink current project
+    /cloud new           - Create cloud project
 ```
 
 ---
 
-### 🟣 Phase 3: Advanced Features (Est: 6-8 hours)
-
-#### **T3.1**: Codebase Analysis Skill
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T2.2
-- **Description**:
-  - Create AI skill that analyzes existing code
-  - Use Glob/Grep to scan project structure
-  - Detect frameworks and patterns
-  - Suggest improvements to plan
-  - Integrate with `/plan:new` for existing projects
-
-**File: `skills/analyze-codebase/SKILL.md`**
-
-**Capabilities:**
-- Detect tech stack from package.json, requirements.txt, etc.
-- Identify folder structure patterns
-- Find existing features
-- Suggest missing tasks based on incomplete features
-
----
-
-#### **T3.2**: Task Breakdown Skill
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T2.2
-- **Description**:
-  - Create skill for breaking down high-level tasks
-  - Accept a task description
-  - Generate 3-7 subtasks
-  - Estimate complexity for each
-  - Add to PROJECT_PLAN.md
-
-**File: `skills/suggest-breakdown/SKILL.md`**
-
-**Usage by Claude:**
-When user says "break down task T2.1", skill:
-- Analyzes the task description
-- Considers project context
-- Suggests concrete subtasks with files
-
-**Example breakdown:**
-```
-Task: "User Authentication"
-  ↓
-Subtasks:
-  - T2.1.1: Setup Passport.js
-  - T2.1.2: Google OAuth config
-  - T2.1.3: Session middleware
-  - T2.1.4: Login/logout routes
-  - T2.1.5: Protected route middleware
-```
-
----
-
-#### **T3.3**: Complexity & Time Estimation Skill
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T2.2, T3.1
-- **Description**:
-  - Create skill that estimates task complexity
-  - Use heuristics based on:
-    * Number of files to create/modify
-    * Technologies involved
-    * Dependencies on external services
-    * Testing requirements
-  - Provide time estimates (Low: 1-3h, Medium: 4-8h, High: 8-16h)
-
-**File: `skills/estimate-complexity/SKILL.md`**
-
-**Heuristics:**
-- Low: 1-3 files, well-known patterns
-- Medium: 4-8 files, some complexity, API integration
-- High: 8+ files, complex logic, new patterns, testing
-
----
-
-#### **T3.4**: `/plan:export` Command - GitHub Issues
-- [ ] **Status**: TODO
-- **Complexity**: 🔴 High
-- **Estimated**: 3 hours
-- **Dependencies**: T2.2
-- **Description**:
-  - Parse PROJECT_PLAN.md tasks
-  - Use GitHub CLI (gh) to create issues
-  - Create labels (phase-1, complexity-medium, etc.)
-  - Set up project board
-  - Link dependencies using task references
-  - Add task metadata as issue description
-
-**File: `commands/export/SKILL.md`**
+#### **T4.2**: /cloud link Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T4.1
+- **აღწერა**:
+  Add to `commands/cloud/SKILL.md`:
 
 **Usage:**
 ```bash
-/plan:export github
-/plan:export json
-/plan:export markdown-summary
+/cloud link              # Interactive - show list and select
+/cloud link abc123       # Link to specific project
+/cloud unlink            # Remove link
 ```
 
-**GitHub Issue Format:**
-```markdown
-# T1.1: Project Setup
+**Flow:**
+1. If no ID: show project list, let user select
+2. Save projectId to local config
+3. Optionally sync immediately
 
-**Phase**: 1 - Foundation
-**Complexity**: Low
-**Estimated**: 1 hour
-**Status**: TODO
+---
 
-## Description
-Initialize Next.js + Express projects...
+#### **T4.3**: /cloud new Command
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T4.1, T3.1
+- **აღწერა**:
+  Add to `commands/cloud/SKILL.md`:
+
+**Usage:**
+```bash
+/cloud new               # Create from local PROJECT_PLAN.md
+/cloud new "My Project"  # With custom name
+```
+
+**Flow:**
+1. Check PROJECT_PLAN.md exists
+2. Extract project name from plan (or use argument)
+3. POST /projects with name
+4. Save projectId to config
+5. Push current plan to cloud
+6. Show success
+
+---
+
+## Phase 5: Testing & Documentation
+
+**Goal:** Ensure quality and document features
+
+---
+
+#### **T5.1**: End-to-End Testing
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T4.3
+- **აღწერა**:
+  Test complete flows:
+  1. Fresh login → create project → sync → update → verify on web
+  2. Pull existing project → modify → push
+  3. Conflict handling
+  4. Error scenarios (network, auth, etc.)
+  5. Multi-language support
+
+  **Completed**: Created comprehensive CLOUD_TESTING_GUIDE.md with:
+  - 35+ test scenarios covering all flows
+  - Authentication flow tests (10 tests)
+  - Fresh flow tests (complete workflow)
+  - Pull-modify-push tests (4 tests)
+  - Conflict handling tests (3 tests)
+  - Error scenario tests (9 tests)
+  - Multi-language tests (5 tests)
+  - Auto-sync tests (4 tests)
+  - Quick smoke test checklist
+
+---
+
+#### **T5.2**: Documentation Update
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T5.1
+- **აღწერა**:
+  Update documentation:
+  - `README.md` - Add cloud features section
+  - `utils/config-guide.md` - Document cloud config
+  - Add examples for cloud commands
+  - Update plugin.json version to 1.2.0
+
+**Completed**: Updated all documentation for v1.2.0:
+  - README.md: Added cloud features section with all new commands
+  - README.md: Updated project structure to include new commands/skills
+  - README.md: Added configuration section with cloud options
+  - README.md: Updated development status to show v1.2.0 complete
+  - plugin.json: Updated version to 1.2.0 with new keywords
+  - utils/config-guide.md: Already contains full cloud config documentation
+
+---
+
+## File Structure (New Files)
+
+```
+claude-plan-plugin/
+├── commands/
+│   ├── login/
+│   │   └── SKILL.md          # NEW: /login command
+│   ├── logout/
+│   │   └── SKILL.md          # NEW: /logout command
+│   ├── whoami/
+│   │   └── SKILL.md          # NEW: /whoami command
+│   ├── sync/
+│   │   └── SKILL.md          # NEW: /sync command
+│   └── cloud/
+│       └── SKILL.md          # NEW: /cloud command
+├── skills/
+│   ├── api-client/
+│   │   └── SKILL.md          # NEW: HTTP client skill
+│   └── credentials/
+│       └── SKILL.md          # NEW: Token management skill
+└── locales/
+    ├── en.json               # MODIFY: Add cloud translations
+    └── ka.json               # MODIFY: Add cloud translations
+```
+
+---
 
 ## Dependencies
-- None
 
-## Files to Create/Modify
-- package.json
-- tsconfig.json
-- .env.example
+### External Requirements
+- `curl` - For HTTP requests (available on all platforms)
+- Internet connection - For API communication
+
+### API Requirements
+- Backend API running at `api.planflow.tools`
+- Valid API token from `planflow.tools/dashboard/settings/tokens`
+
+---
+
+## Success Criteria
+
+- [x] User can login with API token
+- [x] User can sync local PROJECT_PLAN.md to cloud
+- [x] User can pull cloud project to local
+- [x] Task updates sync automatically (optional)
+- [x] User can manage multiple cloud projects
+- [x] All commands work in English and Georgian
+- [x] Error messages are helpful and actionable
+- [x] Documentation is complete
+
+---
+
+## Notes
+
+### Security Considerations
+- API tokens stored in plain text in config (standard practice for CLI tools)
+- Tokens should have limited scope
+- Never log or display full token
+
+### Offline Support
+- All existing commands work offline
+- Cloud commands show clear error when offline
+- Local changes preserved until sync
+
+### Conflict Resolution
+- Default: Ask user what to do
+- `--force` flag: Overwrite without asking
+- ✅ Phase 6: Smart merge based on timestamps
+
+---
+
+## Phase 6: Hybrid Sync (v1.3.0)
+
+**Goal:** Implement Smart Merge system for seamless local + cloud synchronization
+
+**Features:**
+- Storage mode configuration (local/cloud/hybrid)
+- Auto-sync on every /update command
+- Smart merge for non-conflicting changes
+- Rich conflict UI with diff, timestamps, and author info
+
+---
+
+#### **T6.1**: Storage Mode Configuration
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: None
+- **აღწერა**:
+  Add `storage_mode` option to config schema:
+  ```json
+  {
+    "cloud": {
+      "storageMode": "hybrid",  // "local" | "cloud" | "hybrid"
+      "autoSync": true
+    }
+  }
+  ```
+
+**Modes:**
+- `local` - PROJECT_PLAN.md only, no auto-sync
+- `cloud` - Cloud is source of truth, local is cache
+- `hybrid` - Both local and cloud, with smart merge (default for authenticated users)
+
+**Files to modify:**
+- `utils/config-guide.md` - Document storage modes
+- `locales/en.json` - Add translation keys
+- `locales/ka.json` - Add Georgian translations
+
+---
+
+#### **T6.2**: Pull Before Push Logic
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T6.1
+- **აღწერა**:
+  Modify sync flow to always pull before push:
+
+**Flow:**
+```
+/update T1.1 done
+    ↓
+1. Update local PROJECT_PLAN.md
+    ↓
+2. If hybrid mode + authenticated:
+    ↓
+3. PULL: GET /projects/:id/tasks (cloud state)
+    ↓
+4. COMPARE: Detect changes since lastSyncedAt
+    ↓
+5. MERGE or CONFLICT (T6.3)
+    ↓
+6. PUSH: PUT /projects/:id/tasks (merged state)
+```
+
+**Files to modify:**
+- `commands/update/SKILL.md` - Add pull-before-push logic
+- `skills/api-client/SKILL.md` - Add task comparison helpers
+
+---
+
+#### **T6.3**: Smart Merge Algorithm
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🔴 High
+- **დამოკიდებულებები**: T6.2
+- **აღწერა**:
+  Implement Git-like smart merge for tasks:
+
+**Merge Rules:**
+```
+LOCAL changed T1.1, CLOUD changed T2.3
+→ AUTO MERGE ✓ (different tasks)
+
+LOCAL changed T1.1 → done, CLOUD changed T1.1 → blocked
+→ CONFLICT ⚠️ (same task, different values)
+
+LOCAL changed T1.1 → done, CLOUD changed T1.1 → done
+→ AUTO MERGE ✓ (same task, same value)
+```
+
+**Data Structure:**
+```json
+{
+  "taskId": "T1.1",
+  "localStatus": "done",
+  "localUpdatedAt": "2026-02-01T10:00:00Z",
+  "localUpdatedBy": "local",
+  "cloudStatus": "blocked",
+  "cloudUpdatedAt": "2026-02-01T09:30:00Z",
+  "cloudUpdatedBy": "teammate@example.com"
+}
+```
+
+**Files to create:**
+- `skills/smart-merge/SKILL.md` - Merge algorithm implementation
+
+---
+
+#### **T6.4**: Conflict Detection UI
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T6.3
+- **აღწერა**:
+  Rich conflict UI showing:
+  - ✅ სხვაობის ჩვენება (diff)
+  - ✅ დროის ჩვენება (timestamps)
+  - ✅ ავტორის ჩვენება (who changed)
+  - ✅ Preview ორივე ვერსიის
+
+**Conflict Output Example:**
+```
+⚠️ კონფლიქტი აღმოჩენილია!
+
+Task T1.1: "Setup authentication"
+
+┌─────────────────────────────────────────────────────┐
+│ 📍 LOCAL                  │ ☁️ CLOUD                │
+├─────────────────────────────────────────────────────┤
+│ სტატუსი: done ✅          │ სტატუსი: blocked 🚫    │
+│ დრო: 10:00 (30 წთ წინ)    │ დრო: 09:30 (1 სთ წინ)  │
+│ ავტორი: შენ               │ ავტორი: team@email.com │
+└─────────────────────────────────────────────────────┘
+
+რომელი ვერსია შევინარჩუნოთ?
+  1. ლოკალური (done)
+  2. Cloud (blocked)
+  3. გაუქმება
+```
+
+**Files modified:**
+- `commands/sync/SKILL.md` - Added Conflict Detection UI section
+- `locales/en.json` - Added conflict translation keys
+- `locales/ka.json` - Added Georgian conflict translations
+
+**Implementation includes:**
+- Single task conflict display with side-by-side comparison
+- Multiple conflicts summary view
+- Conflict resolution options (keep local/cloud/cancel)
+- Timeline diff view for detailed conflict analysis
+- Error handling for network issues
+- Full bilingual support (English/Georgian)
+
+---
+
+#### **T6.5**: Auto-Sync Enhancement
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟡 Medium
+- **დამოკიდებულებები**: T6.3, T6.4
+- **აღწერა**:
+  Enhance /update auto-sync with smart merge:
+
+**Current flow (v1.2.0):**
+```
+/update T1.1 done → update local → push to cloud (overwrite)
+```
+
+**New flow (v1.3.0):**
+```
+/update T1.1 done → update local → pull → smart merge → push
+```
+
+**Behavior by mode:**
+- `local`: No sync, just update file
+- `cloud`: Pull first, apply change, push
+- `hybrid`: Update file, pull, smart merge, push
+
+**Files modified:**
+- `commands/update/SKILL.md` - Added:
+  - Sync Mode Decision Flow section
+  - Smart Merge skill integration documentation
+  - Offline Fallback Handling section with pending sync queue
+  - Complete flow diagrams
+- `locales/en.json` - Added offline mode translation keys
+- `locales/ka.json` - Added Georgian offline mode translations
+- `utils/config-guide.md` - Already had storageMode documentation (v1.3.0)
+
+**Implementation includes:**
+- Mode-based sync decision logic (local/auto_sync/cloud/hybrid)
+- Integration with `skills/smart-merge/SKILL.md` algorithm
+- Offline detection and graceful degradation
+- Pending sync queue (`.plan-pending-sync.json`)
+- Queue processing on next online sync
+- Full bilingual support (English/Georgian)
+
+---
+
+#### **T6.6**: Testing & Documentation
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T6.5
+- **აღწერა**:
+  Test and document Hybrid Sync:
+
+**Test Scenarios:**
+1. Two users update different tasks → auto merge
+2. Two users update same task differently → conflict UI
+3. Two users update same task same way → auto merge
+4. Offline update → sync when online
+5. Network error during sync → graceful fallback
+
+**Documentation:**
+- Update README.md with Hybrid Sync section
+- Update CLOUD_TESTING_GUIDE.md with new tests
+- Add examples for conflict resolution
+
+---
+
+## Success Criteria (v1.3.0)
+
+- [x] User can choose storage mode (local/cloud/hybrid)
+- [x] Auto-sync uses pull-before-push pattern
+- [x] Non-conflicting changes merge automatically
+- [x] Conflicts show rich diff UI with timestamps and author
+- [x] User can resolve conflicts interactively
+- [x] Offline mode works gracefully
+- [x] All features work in English and Georgian
+
+---
+
+## Phase 7: MCP Documentation (v1.4.0)
+
+**Goal:** Document MCP Server integration as alternative connection method
+
+**MCP Package:** `@planflow-tools/mcp` ✅ Published on npm
+
+---
+
+#### **T7.1**: README განახლება
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: None
+- **აღწერა**:
+  Plugin README.md-ში დავამატოთ Connection Methods სექცია:
+
+**დასამატებელი სექციები:**
+- Connection Methods overview (Commands vs MCP)
+- MCP Installation (`npm install -g @planflow-tools/mcp`)
+- MCP Configuration for Claude Desktop/Code
+- Usage examples
+
+---
+
+#### **T7.2**: არქიტექტურის დიაგრამის განახლება
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T7.1
+- **აღწერა**:
+  PROJECT_PLAN.md-ში არქიტექტურის დიაგრამა განვაახლოთ MCP-ით:
+
+```
+┌─────────────────────────────────────────────────┐
+│               მომხმარებელი                       │
+└─────────────────────────────────────────────────┘
+              │                    │
+              ▼                    ▼
+┌──────────────────────┐  ┌────────────────────────┐
+│ Method A: Commands   │  │ Method B: MCP Server   │
+│ /next, /update, etc  │  │ @planflow-tools/mcp    │
+│ (SKILL.md + curl)    │  │ (native Claude tools)  │
+└──────────────────────┘  └────────────────────────┘
+              │                    │
+              └────────┬───────────┘
+                       ▼
+              api.planflow.tools
 ```
 
 ---
 
-### 🟠 Phase 4: Polish & Testing (Est: 4-5 hours)
+#### **T7.3**: MCP Setup Guide
+- [x] **სტატუსი**: DONE ✅
+- **სირთულე**: 🟢 Low
+- **დამოკიდებულებები**: T7.1
+- **აღწერა**:
+  დეტალური setup guide:
 
-#### **T4.1**: Documentation & Examples
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: ALL previous
-- **Description**:
-  - Complete README.md with:
-    * Installation instructions
-    * Usage examples for all commands
-    * Screenshots/examples of generated plans
-    * FAQ section
-  - Add inline documentation to all SKILL.md files
-  - Create CHANGELOG.md
-  - Add LICENSE file
-
-**File: `README.md`**
-
-**Sections:**
-- What is plan-plugin?
-- Why use it?
-- Installation
-- Quick Start
-- Commands Reference
-- Configuration
-- Examples
-- Contributing
-
----
-
-#### **T4.2**: Testing & Validation
-- [ ] **Status**: TODO
-- **Complexity**: 🟡 Medium
-- **Estimated**: 2 hours
-- **Dependencies**: T4.1
-- **Description**:
-  - Test with various project types (fullstack, backend, frontend)
-  - Test all commands with edge cases
-  - Verify template generation quality
-  - Test GitHub export functionality
-  - Test on existing codebase
-  - Fix bugs found during testing
-  - Validate with `--plugin-dir` flag
-
-**Test Cases:**
-1. New full-stack project
-2. New backend-only API
-3. New frontend SPA
-4. Existing project analysis
-5. Task updates and progress tracking
-6. Next task suggestions
-7. GitHub export
-8. JSON export
-
----
-
-#### **T4.3**: Optimization & Release
-- [ ] **Status**: TODO
-- **Complexity**: 🟢 Low
-- **Estimated**: 1 hour
-- **Dependencies**: T4.2
-- **Description**:
-  - Optimize template sizes
-  - Review command descriptions for clarity
-  - Test plugin load time
-  - Create GitHub repository
-  - Tag v1.0.0 release
-  - Publish to plugin marketplace (if available)
-
----
-
-## 📊 Progress Tracking
-
-### Overall Status
-**Total Tasks**: 14
-**Completed**: 1 🟩⬜⬜⬜⬜⬜⬜⬜⬜⬜ (7%)
-**In Progress**: 0
-**Blocked**: 0
-
-### Phase Progress
-- 🟢 Phase 1: Foundation → 1/4 (25%)
-- 🔵 Phase 2: Core Commands → 0/4 (0%)
-- 🟣 Phase 3: Advanced Features → 0/4 (0%)
-- 🟠 Phase 4: Polish & Testing → 0/3 (0%)
-
-### Current Focus
-🎯 **Next Task**: T1.2 - Plugin Manifest Configuration
-
-### Estimated Timeline
-- **Total Estimated Time**: 22-29 hours
-- **Phase 1**: 4-6 hours
-- **Phase 2**: 8-10 hours
-- **Phase 3**: 6-8 hours
-- **Phase 4**: 4-5 hours
-
----
-
-## 🎯 Success Criteria
-
-### Minimum Viable Product (v1.0.0)
-- ✅ `/plan:new` creates comprehensive PROJECT_PLAN.md
-- ✅ `/plan:update` tracks task progress
-- ✅ `/plan:next` suggests next task intelligently
-- ✅ Works for full-stack, backend, and frontend projects
-- ✅ Clear documentation
-
-### Nice to Have (v1.1.0+)
-- GitHub Issues export
-- JSON export
-- Codebase analysis for existing projects
-- Task breakdown skill
-- Time tracking
-- Multiple language support (Georgian/English)
-
----
-
-## 📌 Technical Decisions & Notes
-
-### Why Single Large File (PROJECT_PLAN.md)?
-✅ **Pros:**
-- Everything in one place
-- Easy to search (Ctrl+F)
-- Single source of truth
-- Works offline
-- Git-friendly
-
-❌ **Cons:**
-- Can get large for huge projects
-- Harder to parse programmatically
-
-**Decision**: Start with single file, add multi-file support in v2.0 if needed
-
-### Why Markdown + Mermaid?
-- ✅ Human-readable
-- ✅ Git-friendly (diffs work well)
-- ✅ Portable (works anywhere)
-- ✅ Mermaid renders in GitHub/VSCode
-- ✅ No external dependencies
-
-### Why Interactive Wizard vs CLI Args?
-**Wizard** (`/plan:new` → questions) is better because:
-- More user-friendly for complex input
-- Context-aware follow-ups
-- Prevents overwhelming users
-- Natural conversation flow
-
----
-
-## 🔗 Resources & References
-
-### Claude Code Documentation
-- [Create plugins](https://code.claude.com/docs/en/plugins.md)
-- [Skills documentation](https://code.claude.com/docs/en/skills)
-- [Plugin reference](https://code.claude.com/docs/en/plugins-reference)
-
-### Tools & Libraries
-- [Mermaid.js](https://mermaid.js.org/) - Diagram syntax
-- [GitHub CLI](https://cli.github.com/) - For exports
-
-### Inspiration
-- Linear - Task management UX
-- Notion - Document structure
-- GitHub Projects - Project planning
-
----
-
-## 🚀 Getting Started (Development)
-
-### Prerequisites
-- Claude Code v1.0.33+
-- Node.js (for testing export scripts)
-- Git
-- GitHub account (for testing exports)
-
-### Development Setup
-```bash
-# Clone/create plugin directory
-mkdir plan-plugin
-cd plan-plugin
-
-# Test plugin locally
-claude --plugin-dir ./plan-plugin
-
-# After making changes, restart Claude Code
+**Claude Desktop კონფიგურაცია:**
+```json
+// ~/.config/claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "planflow": {
+      "command": "npx",
+      "args": ["@planflow-tools/mcp"]
+    }
+  }
+}
 ```
 
-### Testing Workflow
-1. Make changes to plugin files
-2. Restart Claude Code with `--plugin-dir`
-3. Test commands with `/plan:*`
-4. Iterate based on results
+**Claude Code კონფიგურაცია:**
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "planflow": {
+      "command": "npx",
+      "args": ["@planflow-tools/mcp"]
+    }
+  }
+}
+```
+
+**გამოყენების მაგალითები:**
+- "What's my next task?" → planflow_task_next
+- "Mark T1.1 as done" → planflow_task_update
+- "Sync my project" → planflow_sync
 
 ---
 
-## 📝 Future Enhancements (v2.0+)
+## Success Criteria (v1.4.0)
 
-### Planned Features
-- 🌍 Multi-language support (Georgian, Russian, etc.)
-- 🤖 AI-powered task generation from features
-- 📊 Gantt chart generation
-- 🔄 Integration with Jira, Linear, Asana
-- 📈 Velocity tracking & sprint planning
-- 🧪 Test coverage tracking
-- 📱 Mobile app project templates
-- 🐳 Docker/Kubernetes templates
-- 🔐 Security audit checklist
-- 📚 API documentation generation
-
-### Community Ideas
-- Template marketplace
-- Custom template creation
-- Team templates sharing
-- Slack/Discord notifications
-- Time tracking integration
-- Calendar integration
-
----
-
-*Generated by plan-plugin (meta planning) v1.0.0*
-*This plan follows the same structure that the plugin will generate! 🎯*
+- [x] README documents both connection methods
+- [x] Architecture diagram shows Commands + MCP
+- [x] MCP setup guide is complete and clear
+- [x] Examples show natural language usage

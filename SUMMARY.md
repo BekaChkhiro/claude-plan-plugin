@@ -55,10 +55,10 @@ cd ~/test-project
 claude
 
 # Commands:
-/plan:new        # შექმნა plan-ის
-/plan:next       # შემდეგი task
-/plan:update     # progress update
-/plan:export     # ექსპორტი
+/new        # შექმნა plan-ის
+/next       # შემდეგი task
+/update     # progress update
+/export     # ექსპორტი
 ```
 
 ### 3️⃣ Plugin-ის გაზიარება
@@ -103,7 +103,7 @@ curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/mast
    ```bash
    cd ~/test-project
    claude
-   /plan:new
+   /new
    ```
 
 2. **წაიკითხე QUICK_REFERENCE.md**

@@ -9,7 +9,7 @@ We're excited to announce v1.1.0 of the Plan Plugin, featuring complete **multi-
 The plugin now speaks your language! Set your preferred language and get a fully localized experience:
 
 ```bash
-/plan:settings language
+/settings language
 ```
 
 **Supported Languages:**
@@ -19,12 +19,12 @@ The plugin now speaks your language! Set your preferred language and get a fully
 
 ### Language Settings Command
 
-New `/plan:settings` command to manage your preferences:
+New `/settings` command to manage your preferences:
 
 ```bash
-/plan:settings              # View current settings
-/plan:settings language     # Change language
-/plan:settings reset        # Reset to defaults
+/settings              # View current settings
+/settings language     # Change language
+/settings reset        # Reset to defaults
 ```
 
 ### Complete Georgian Translation
@@ -99,10 +99,10 @@ curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/mast
 claude
 
 # Try it in Georgian!
-/plan:settings language
+/settings language
 # Select: ქართული (Georgian)
 
-/plan:new
+/new
 # Wizard now speaks Georgian!
 ```
 
@@ -117,7 +117,7 @@ git pull origin master
 curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh | bash
 
 # Set your language
-/plan:settings language
+/settings language
 ```
 
 ## 📊 By The Numbers
@@ -204,7 +204,7 @@ If you're upgrading from v1.0.0:
 cd ~/.config/claude/plugins/plan
 git pull origin master
 # Your existing plans will still work!
-# Just set your language: /plan:settings language
+# Just set your language: /settings language
 ```
 
 ---

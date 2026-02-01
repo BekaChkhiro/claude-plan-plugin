@@ -43,7 +43,7 @@ claude
 After installation, start Claude Code and run:
 
 ```
-/plan:new
+/new
 ```
 
 If you see the wizard, the plugin is installed correctly!
@@ -67,7 +67,7 @@ claude --plugin-dir ~/.config/claude/plugins/plan
 
 ```bash
 # Ensure you're using correct command format
-/plan:new        # ✅ Correct
+/new        # ✅ Correct
 plan:new         # ❌ Missing slash
 /plan new        # ❌ Space instead of colon
 ```

@@ -9,7 +9,7 @@ Provide accurate complexity ratings (Low/Medium/High) and time estimates for sof
 ## When to Use
 
 This skill is invoked when:
-- Creating tasks during `/plan:new`
+- Creating tasks during `/new`
 - User asks "how long will task TX.Y take?"
 - User asks "how complex is this feature?"
 - Reviewing or validating existing estimates

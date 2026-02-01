@@ -55,10 +55,10 @@ Code contributions follow these areas:
 Location: `commands/*/SKILL.md`
 
 Add new commands or improve existing ones:
-- `/plan:new` - Project creation wizard
-- `/plan:update` - Task management
-- `/plan:next` - Task recommendations
-- `/plan:export` - Export functionality
+- `/new` - Project creation wizard
+- `/update` - Task management
+- `/next` - Task recommendations
+- `/export` - Export functionality
 
 #### 2. Skills
 Location: `skills/*/SKILL.md`
@@ -101,9 +101,9 @@ Add new project type templates:
    claude --plugin-dir ./claude-plan-plugin
 
    # Test commands
-   /plan:new
-   /plan:update T1.1 start
-   /plan:next
+   /new
+   /update T1.1 start
+   /next
    ```
 
 3. **Make Changes**
@@ -123,10 +123,10 @@ plan-plugin/
 ├── .claude-plugin/
 │   └── plugin.json           # Plugin manifest
 ├── commands/                  # Slash commands
-│   ├── new/SKILL.md          # /plan:new
-│   ├── update/SKILL.md       # /plan:update
-│   ├── next/SKILL.md         # /plan:next
-│   └── export/SKILL.md       # /plan:export
+│   ├── new/SKILL.md          # /new
+│   ├── update/SKILL.md       # /update
+│   ├── next/SKILL.md         # /next
+│   └── export/SKILL.md       # /export
 ├── skills/                    # AI skills
 │   ├── analyze-codebase/
 │   ├── suggest-breakdown/
@@ -205,7 +205,7 @@ Follow conventional commits:
 
 ```
 feat: add mobile app template
-fix: correct progress calculation in /plan:update
+fix: correct progress calculation in /update
 docs: improve README examples
 refactor: simplify task parsing logic
 test: add validation tests for templates
@@ -217,10 +217,10 @@ test: add validation tests for templates
 
 Before submitting a PR, test:
 
-- [ ] `/plan:new` creates valid PROJECT_PLAN.md
-- [ ] `/plan:update` correctly updates tasks
-- [ ] `/plan:next` provides good recommendations
-- [ ] `/plan:export` generates valid output
+- [ ] `/new` creates valid PROJECT_PLAN.md
+- [ ] `/update` correctly updates tasks
+- [ ] `/next` provides good recommendations
+- [ ] `/export` generates valid output
 - [ ] Templates render correctly
 - [ ] Skills provide helpful guidance
 - [ ] Error messages are clear
@@ -239,7 +239,7 @@ Test with:
 
 ```bash
 # Test wizard
-/plan:new
+/new
 
 # Answer questions for different project types
 # Verify generated PROJECT_PLAN.md

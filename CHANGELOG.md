@@ -10,28 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Commands
-- **`/plan:new`** - Interactive project wizard
+- **`/new`** - Interactive project wizard
   - Asks strategic questions about your project
   - Generates comprehensive PROJECT_PLAN.md
   - Supports multiple project types (Full-stack, Backend, Frontend)
   - Creates Mermaid architecture diagrams
   - Generates phased task breakdown
 
-- **`/plan:update`** - Task status management
+- **`/update`** - Task status management
   - Update tasks: `start`, `done`, `block`
   - Automatic progress calculation
   - Phase-by-phase tracking
   - Visual progress bars
   - Dependency tracking
 
-- **`/plan:next`** - Intelligent task recommendations
+- **`/next`** - Intelligent task recommendations
   - Analyzes dependencies and priorities
   - Suggests optimal next task
   - Provides reasoning for recommendations
   - Shows alternative tasks
   - Considers complexity balance
 
-- **`/plan:export`** - Multiple export formats
+- **`/export`** - Multiple export formats
   - GitHub Issues integration (via gh CLI)
   - JSON structured export
   - Markdown summary generation
@@ -113,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Multi-Language Support 🌍
-- **Language Settings Command** - `/plan:settings`
+- **Language Settings Command** - `/settings`
   - Change language preference
   - View current configuration
   - Reset to defaults
@@ -160,22 +160,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 #### Commands Updated for i18n
-- **`/plan:new`** - Load language-specific templates
+- **`/new`** - Load language-specific templates
   - Wizard questions use translations
   - Generate plans in selected language
   - Language-aware template selection
 
-- **`/plan:next`** - Translated task recommendations
+- **`/next`** - Translated task recommendations
   - Complexity labels in user's language
   - Status indicators translated
   - Reasoning in user's language
 
-- **`/plan:update`** - Translated progress tracking
+- **`/update`** - Translated progress tracking
   - Success messages in user's language
   - Status updates translated
   - Progress indicators localized
 
-- **`/plan:export`** - Translated export messages
+- **`/export`** - Translated export messages
   - Format validation in user's language
   - Success confirmations translated
   - Error messages localized
@@ -208,7 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Local config: `./.plan-config.json` (project-specific, highest priority)
   - Global config: `~/.config/claude/plan-plugin-config.json` (user-wide fallback)
   - Default: English (final fallback)
-- **`--local` flag** for `/plan:settings language` command
+- **`--local` flag** for `/settings language` command
   - Set language for current project only
   - Overrides global settings
   - Allows different languages for different projects
@@ -217,19 +217,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Updated Commands for Hierarchical Config
 - **All commands** now use hierarchical config reading
-  - `/plan:new` - Checks local → global → default
-  - `/plan:next` - Checks local → global → default
-  - `/plan:update` - Checks local → global → default
-  - `/plan:export` - Checks local → global → default
-  - `/plan:settings` - Shows both local and global configs
+  - `/new` - Checks local → global → default
+  - `/next` - Checks local → global → default
+  - `/update` - Checks local → global → default
+  - `/export` - Checks local → global → default
+  - `/settings` - Shows both local and global configs
 
 #### Enhanced Settings Command
-- **`/plan:settings`** - Now displays hierarchy
+- **`/settings`** - Now displays hierarchy
   - Shows active configuration source (local/global/default)
   - Displays both local and global configs if they exist
   - Clear indication of which config is being used
-- **`/plan:settings language --local`** - Set project-specific language
-- **`/plan:settings reset --local`** - Remove project-specific settings
+- **`/settings language --local`** - Set project-specific language
+- **`/settings reset --local`** - Remove project-specific settings
 
 ### Technical
 

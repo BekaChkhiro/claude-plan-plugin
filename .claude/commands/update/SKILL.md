@@ -9,10 +9,10 @@ Update the status of tasks in PROJECT_PLAN.md, recalculate progress percentages,
 ## Usage
 
 ```bash
-/plan:update <task-id> <action>
-/plan:update T1.1 start    # Mark task as in progress
-/plan:update T1.1 done     # Mark task as completed
-/plan:update T2.3 block    # Mark task as blocked
+/update <task-id> <action>
+/update T1.1 start    # Mark task as in progress
+/update T1.1 done     # Mark task as completed
+/update T2.3 block    # Mark task as blocked
 ```
 
 ## Process
@@ -82,26 +82,26 @@ If missing, show usage:
 
 **Example output (English):**
 ```
-Usage: /plan:update <task-id> <action>
+Usage: /update <task-id> <action>
 
 Actions:
   start  - Mark task as in progress (TODO → IN_PROGRESS)
   done   - Mark task as completed (ANY → DONE)
   block  - Mark task as blocked (ANY → BLOCKED)
 
-Example: /plan:update T1.1 start
+Example: /update T1.1 start
 ```
 
 **Example output (Georgian):**
 ```
-გამოყენება: /plan:update <task-id> <action>
+გამოყენება: /update <task-id> <action>
 
 მოქმედებები:
   start  - მონიშნე ამოცანა როგორც მიმდინარე (TODO → IN_PROGRESS)
   done   - მონიშნე ამოცანა როგორც დასრულებული (ANY → DONE)
   block  - მონიშნე ამოცანა როგორც დაბლოკილი (ANY → BLOCKED)
 
-მაგალითი: /plan:update T1.1 start
+მაგალითი: /update T1.1 start
 ```
 
 ### Step 2: Read PROJECT_PLAN.md
@@ -116,8 +116,8 @@ If file doesn't exist, output:
 ```
 
 **Example:**
-- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /plan:new first to create a project plan."
-- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /plan:new პროექტის გეგმის შესაქმნელად."
+- EN: "❌ Error: PROJECT_PLAN.md not found in current directory. Please run /new first to create a project plan."
+- KA: "❌ შეცდომა: PROJECT_PLAN.md არ მოიძებნა მიმდინარე დირექტორიაში. გთხოვთ ჯერ გაუშვათ /new პროექტის გეგმის შესაქმნელად."
 
 ### Step 3: Find the Task
 
@@ -327,7 +327,7 @@ Total: 18
 
 🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ 31%
 
-🎯 Next: /plan:next (get recommendation)
+🎯 Next: /next (get recommendation)
 ```
 
 **Example output (Georgian):**
@@ -345,7 +345,7 @@ Total: 18
 
 🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜ 31%
 
-🎯 შემდეგი: /plan:next (რეკომენდაციის მისაღებად)
+🎯 შემდეგი: /next (რეკომენდაციის მისაღებად)
 ```
 
 **Instructions for Claude:**
@@ -494,7 +494,7 @@ Some transitions don't make sense. Allow all but note:
 
 Make sure:
 1. You're in the correct project directory
-2. The file exists (run /plan:new if not)
+2. The file exists (run /new if not)
 3. You have read permissions
 ```
 
@@ -539,7 +539,7 @@ Please check the PROJECT_PLAN.md file manually.
 
 ### Example 1: Starting a Task
 ```bash
-User: /plan:update T1.1 start
+User: /update T1.1 start
 
 Output:
 ✅ Task T1.1 updated: TODO → IN_PROGRESS 🔄
@@ -551,12 +551,12 @@ You're now working on:
   Complexity: Low
   Estimated: 2 hours
 
-Good luck! Run /plan:update T1.1 done when finished.
+Good luck! Run /update T1.1 done when finished.
 ```
 
 ### Example 2: Completing a Task
 ```bash
-User: /plan:update T1.1 done
+User: /update T1.1 done
 
 Output:
 ✅ Task T1.1 completed! 🎉
@@ -572,12 +572,12 @@ Overall Status:
 
 🔓 Unlocked: T1.2 - Database Configuration
 
-🎯 Next: /plan:next (get recommendation)
+🎯 Next: /next (get recommendation)
 ```
 
 ### Example 3: Blocking a Task
 ```bash
-User: /plan:update T2.3 block
+User: /update T2.3 block
 
 Output:
 🚫 Task T2.3 marked as blocked
@@ -595,7 +595,7 @@ Overall Status:
   - Create a task to resolve the blocker
   - Update dependencies if needed
 
-Run /plan:next to find alternative tasks to work on.
+Run /next to find alternative tasks to work on.
 ```
 
 ## Important Notes

@@ -20,7 +20,7 @@ Plugin ახლა მხარს უჭერს მრავალ ენა
 
 ### როგორ მუშაობს
 
-1. მომხმარებელი ირჩევს ენას: `/plan:settings language`
+1. მომხმარებელი ირჩევს ენას: `/settings language`
 2. არჩევანი ინახება: `~/.config/claude/plan-plugin-config.json`
 3. თარგმანები იტვირთება: `locales/{lang}.json`
 4. Commands იყენებენ თარგმნილ strings-ებს

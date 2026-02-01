@@ -134,7 +134,7 @@ t.common.no              // "No"
 // Command outputs
 t.commands.new.welcome   // "📋 Welcome to Plan Creation Wizard!"
 t.commands.next.title    // "🎯 Recommended Next Task"
-t.commands.update.usage  // "Usage: /plan:update <task-id> <action>"
+t.commands.update.usage  // "Usage: /update <task-id> <action>"
 
 // Wizard
 t.wizard.projectTypes.fullstack     // "Full-Stack Web App"
@@ -204,10 +204,10 @@ Output to user:
 \`\`\`
 ```
 
-## 📋 Complete Example: /plan:new Command
+## 📋 Complete Example: /new Command
 
 ```markdown
-# /plan:new - Create New Project Plan (i18n version)
+# /new - Create New Project Plan (i18n version)
 
 ## Step 0: Load Translations
 
@@ -302,8 +302,8 @@ Output to user:
 
 Next steps:
 - Review the plan and adjust as needed
-- Start with: /plan:next (to get the next task)
-- Update progress: /plan:update T1.1 start
+- Start with: /next (to get the next task)
+- Update progress: /update T1.1 start
 \`\`\`
 ```
 
@@ -445,7 +445,7 @@ Test 4: Use non-existent language "fr", run command (should fall back to "en")
 ## 📦 Complete Template for SKILL.md
 
 ```markdown
-# /plan:commandname - Command Description
+# /commandname - Command Description
 
 ## Step 0: Load User Language & Translations
 
@@ -510,30 +510,30 @@ Always use `t.commands.commandname.*` for user-facing text!
 ```bash
 # Test 1: Default language (English)
 rm ~/.config/claude/plan-plugin-config.json
-/plan:new
+/new
 # Should show English text
 
 # Test 2: Georgian language
 echo '{"language":"ka"}' > ~/.config/claude/plan-plugin-config.json
-/plan:new
+/new
 # Should show Georgian text
 
 # Test 3: Invalid language (fallback to English)
 echo '{"language":"fr"}' > ~/.config/claude/plan-plugin-config.json
-/plan:new
+/new
 # Should show English text (fr.json doesn't exist)
 
 # Test 4: Corrupted config (fallback to English)
 echo 'invalid json' > ~/.config/claude/plan-plugin-config.json
-/plan:new
+/new
 # Should show English text
 
 # Test 5: All commands with Georgian
 echo '{"language":"ka"}' > ~/.config/claude/plan-plugin-config.json
-/plan:new
-/plan:next
-/plan:update T1.1 start
-/plan:export json
+/new
+/next
+/update T1.1 start
+/export json
 # All should show Georgian text
 ```
 

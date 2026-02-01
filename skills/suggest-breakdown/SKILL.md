@@ -12,7 +12,7 @@ This skill is invoked when:
 - User asks to "break down task TX.Y"
 - User says "expand this task"
 - A task is marked as High complexity and user wants detail
-- During `/plan:new` to expand core features into tasks
+- During `/new` to expand core features into tasks
 
 ## Process
 

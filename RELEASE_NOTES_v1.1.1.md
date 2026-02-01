@@ -14,10 +14,10 @@ You can now set different languages for different projects! The plugin now suppo
 
 ```bash
 # Set global language (affects all projects)
-/plan:settings language
+/settings language
 
 # Set project-specific language (only affects current project)
-/plan:settings language --local
+/settings language --local
 ```
 
 **Configuration Priority:**
@@ -34,32 +34,32 @@ You can now set different languages for different projects! The plugin now suppo
 ```bash
 # Personal project in Georgian
 cd ~/projects/personal-app
-/plan:settings language --local
+/settings language --local
 # Select: ქართული (Georgian)
-/plan:new  # Creates Georgian plan
+/new  # Creates Georgian plan
 
 # Work project in English
 cd ~/projects/work-app
-/plan:settings language --local
+/settings language --local
 # Select: English
-/plan:new  # Creates English plan
+/new  # Creates English plan
 ```
 
 ### Global Default with Project Overrides
 
 ```bash
 # Set global default to Georgian
-/plan:settings language
+/settings language
 # Select: ქართული
 
 # Override for specific project
 cd ~/projects/international-collab
-/plan:settings language --local
+/settings language --local
 # Select: English
 
 # Other projects use Georgian automatically
 cd ~/projects/other-project
-/plan:new  # Uses Georgian (from global config)
+/new  # Uses Georgian (from global config)
 ```
 
 ---
@@ -69,7 +69,7 @@ cd ~/projects/other-project
 ### View Configuration Hierarchy
 
 ```bash
-/plan:settings
+/settings
 ```
 
 **Output:**
@@ -88,20 +88,20 @@ cd ~/projects/other-project
   📅 Last Used: 2026-01-27T14:00:00Z
 
 Available Commands:
-- /plan:settings language           # Change global language
-- /plan:settings language --local   # Change project language
-- /plan:settings reset              # Reset global settings
-- /plan:settings reset --local      # Remove project settings
+- /settings language           # Change global language
+- /settings language --local   # Change project language
+- /settings reset              # Reset global settings
+- /settings reset --local      # Remove project settings
 ```
 
 ### Reset Commands
 
 ```bash
 # Remove project-specific settings (fall back to global)
-/plan:settings reset --local
+/settings reset --local
 
 # Reset global settings to defaults (English)
-/plan:settings reset
+/settings reset
 ```
 
 ---
@@ -111,11 +111,11 @@ Available Commands:
 ### All Commands Updated
 
 All commands now use hierarchical config reading:
-- `/plan:new` - Creates plans in project's language
-- `/plan:next` - Recommends tasks in project's language
-- `/plan:update` - Updates progress in project's language
-- `/plan:export` - Exports in project's language
-- `/plan:settings` - Manages both local and global configs
+- `/new` - Creates plans in project's language
+- `/next` - Recommends tasks in project's language
+- `/update` - Updates progress in project's language
+- `/export` - Exports in project's language
+- `/settings` - Manages both local and global configs
 
 ### New Translation Keys
 
@@ -160,7 +160,7 @@ curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/mast
 Your existing global language settings will continue to work. To use project-specific settings, just use the `--local` flag:
 
 ```bash
-/plan:settings language --local
+/settings language --local
 ```
 
 ---
@@ -194,30 +194,30 @@ The comprehensive [TESTING_GUIDE.md](TESTING_GUIDE.md) has been updated with sce
 
 ```bash
 # You prefer Georgian globally
-/plan:settings language
+/settings language
 # Select: ქართული
 
 # Create personal project (uses global Georgian)
 cd ~/projects/personal-blog
-/plan:new
+/new
 # ✅ Creates plan in Georgian
 
 # Join international team project (needs English)
 cd ~/projects/team-project
-/plan:settings language --local
+/settings language --local
 # Select: English
-/plan:new
+/new
 # ✅ Creates plan in English
 
 # Check settings
-/plan:settings
+/settings
 # Shows:
 #   Active: English (local)
 #   Local: English
 #   Global: ქართული
 
 # Remove local override to use Georgian again
-/plan:settings reset --local
+/settings reset --local
 # Now uses global Georgian
 ```
 

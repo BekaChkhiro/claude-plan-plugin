@@ -73,7 +73,7 @@ cat examples/example-backend-plan.md
 
 ### 2. Reference During Planning
 
-When running `/plan:new`, refer to these examples to see:
+When running `/new`, refer to these examples to see:
 - How tasks are structured
 - What level of detail to include
 - How to organize phases
@@ -97,7 +97,7 @@ cp examples/example-fullstack-plan.md PROJECT_PLAN.md
 # Edit PROJECT_PLAN.md with your project details
 ```
 
-Then use `/plan:update` and `/plan:next` to manage tasks.
+Then use `/update` and `/next` to manage tasks.
 
 ---
 
@@ -155,7 +155,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
 
 ## Questions?
 
-- How do I create my own plan? → Run `/plan:new`
+- How do I create my own plan? → Run `/new`
 - Can I modify these examples? → Yes, they're templates
 - Where are the templates? → See `templates/` directory
 - How do I contribute? → See [CONTRIBUTING.md](../CONTRIBUTING.md)

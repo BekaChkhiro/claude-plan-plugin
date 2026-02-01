@@ -1,15 +1,18 @@
-# /plan:settings - Plugin Settings Management
+# /planSettings - Plugin Settings Management
 
 Manage plan-plugin configuration including language preferences, default project types, and other settings.
 
 ## Usage
 
 ```bash
-/plan:settings                      # Show current settings
-/plan:settings language             # Change language preference (global)
-/plan:settings language --local     # Change language for this project only
-/plan:settings reset                # Reset global settings to defaults
-/plan:settings reset --local        # Remove project-specific settings
+/planSettings                      # Show current settings
+/planSettings language             # Change language preference (global)
+/planSettings language --local     # Change language for this project only
+/planSettings autoSync             # Show auto-sync status
+/planSettings autoSync on          # Enable auto-sync
+/planSettings autoSync off         # Disable auto-sync
+/planSettings reset                # Reset global settings to defaults
+/planSettings reset --local        # Remove project-specific settings
 ```
 
 ## What This Command Does
@@ -78,6 +81,12 @@ function getConfig() {
 const config = getConfig()
 const language = config.language || "en"
 
+// Cloud config (v1.2.0+)
+const cloudConfig = config.cloud || {}
+const isAuthenticated = !!cloudConfig.apiToken
+const apiUrl = cloudConfig.apiUrl || "https://api.planflow.tools"
+const autoSync = cloudConfig.autoSync || false
+
 // Also load both local and global configs for display
 const localConfig = fileExists("./.plan-config.json")
   ? JSON.parse(readFile("./.plan-config.json"))
@@ -132,7 +141,7 @@ Check what sub-command user requested and whether `--local` flag is present:
 
 Pseudo-code:
 ```javascript
-const args = parseArguments()  // Get arguments after "/plan:settings"
+const args = parseArguments()  // Get arguments after "/settings"
 
 // Check for --local flag
 const isLocal = args.includes("--local")
@@ -147,6 +156,10 @@ if (cleanArgs.length === 0) {
   // Change language
   action = "change-language"
   scope = isLocal ? "local" : "global"
+} else if (cleanArgs[0] === "autoSync" || cleanArgs[0] === "autosync") {
+  // Auto-sync settings
+  action = "autoSync"
+  autoSyncValue = cleanArgs[1] || null  // "on", "off", or null (show status)
 } else if (cleanArgs[0] === "reset") {
   // Reset to defaults
   action = "reset"
@@ -160,12 +173,15 @@ if (cleanArgs.length === 0) {
 **Instructions for Claude:**
 
 Determine which action based on user's command:
-- `/plan:settings` → action = "show"
-- `/plan:settings language` → action = "change-language", scope = "global"
-- `/plan:settings language --local` → action = "change-language", scope = "local"
-- `/plan:settings reset` → action = "reset", scope = "global"
-- `/plan:settings reset --local` → action = "reset", scope = "local"
-- `/plan:settings something-else` → action = "help"
+- `/settings` → action = "show"
+- `/settings language` → action = "change-language", scope = "global"
+- `/settings language --local` → action = "change-language", scope = "local"
+- `/settings autoSync` → action = "autoSync", autoSyncValue = null (show status)
+- `/settings autoSync on` → action = "autoSync", autoSyncValue = "on"
+- `/settings autoSync off` → action = "autoSync", autoSyncValue = "off"
+- `/settings reset` → action = "reset", scope = "global"
+- `/settings reset --local` → action = "reset", scope = "local"
+- `/settings something-else` → action = "help"
 
 ## Step 2: Execute Action
 
@@ -191,6 +207,17 @@ let output = `
 🌍 ${t.commands.settings.language}: ${currentLanguageName} (${config._source})
 `
 
+// Show cloud status (v1.2.0+)
+if (isAuthenticated) {
+  output += `☁️ Cloud: Connected (${cloudConfig.userEmail || "user"})\n`
+  if (cloudConfig.projectId) {
+    output += `📁 Linked Project: ${cloudConfig.projectId}\n`
+  }
+  output += `🔄 Auto-sync: ${autoSync ? "Enabled" : "Disabled"}\n`
+} else {
+  output += `☁️ Cloud: Not connected\n`
+}
+
 // Show local project config if exists
 if (localConfig) {
   const localLangName = languageNames[localConfig.language] || "?"
@@ -209,10 +236,10 @@ if (globalConfig) {
 
 // Show available commands
 output += `\n\n${t.commands.settings.availableCommands}:
-- /plan:settings language           # Change global language
-- /plan:settings language --local   # Change project language
-- /plan:settings reset              # Reset global settings
-- /plan:settings reset --local      # Remove project settings
+- /settings language           # Change global language
+- /settings language --local   # Change project language
+- /settings reset              # Reset global settings
+- /settings reset --local      # Remove project settings
 `
 
 console.log(output)
@@ -227,6 +254,9 @@ Output to user with hierarchical display:
 
 📊 Active Configuration:
 🌍 Language: ქართული (Georgian) (local)
+☁️ Cloud: Connected (user@example.com)
+📁 Linked Project: abc123-def456
+🔄 Auto-sync: Disabled
 
 📁 Project Settings (./.plan-config.json):
   🌍 Language: ქართული
@@ -237,10 +267,10 @@ Output to user with hierarchical display:
   📅 Last Used: 2026-01-27T14:00:00Z
 
 Available Commands:
-- /plan:settings language           # Change global language
-- /plan:settings language --local   # Change project language
-- /plan:settings reset              # Reset global settings
-- /plan:settings reset --local      # Remove project settings
+- /settings language           # Change global language
+- /settings language --local   # Change project language
+- /settings reset              # Reset global settings
+- /settings reset --local      # Remove project settings
 ```
 
 Use the translation keys from `t.commands.settings.*` for all text.
@@ -512,7 +542,7 @@ The new language will be used for:
 • Wizard questions in this project
 • Generated PROJECT_PLAN.md files in this project
 
-Try it: /plan:new
+Try it: /planNew
 ```
 
 For **global** scope:
@@ -528,7 +558,7 @@ The new language will be used for:
 • Wizard questions
 • Generated PROJECT_PLAN.md files
 
-Try it: /plan:new
+Try it: /planNew
 ```
 
 **IMPORTANT:**
@@ -536,6 +566,242 @@ Try it: /plan:new
 - Show the language change as: `{fromLanguage} → {toLanguage}` using native language names.
 - Include scope indicator (📁 for local, 🌐 for global)
 - Clarify that local settings only affect current project, global affects all projects
+
+**Then STOP. Action complete.**
+
+---
+
+### Action: "autoSync" - Manage Auto-Sync Setting
+
+Enable or disable automatic synchronization after `/planUpdate` commands.
+
+**Prerequisites:**
+- User must be authenticated (`/login`)
+- Project should be linked to cloud (`/cloud link`)
+
+**Step 2.1:** Check authentication status
+
+Pseudo-code:
+```javascript
+const isAuthenticated = !!config.cloud?.apiToken
+
+if (!isAuthenticated) {
+  console.log(`
+❌ ${t.commands.settings.autoSyncNotAuthenticated}
+
+💡 ${t.commands.settings.autoSyncLoginFirst}
+   /login
+  `)
+  return
+}
+```
+
+**Instructions for Claude:**
+
+Check if user is authenticated:
+1. Check if `config.cloud?.apiToken` exists
+2. If not authenticated, show error:
+   ```
+   ❌ Auto-sync requires authentication.
+
+   💡 Please login first:
+      /login
+   ```
+3. Stop execution if not authenticated
+
+**Step 2.2:** Handle based on autoSyncValue
+
+Pseudo-code:
+```javascript
+if (autoSyncValue === null) {
+  // Show current status
+  const currentStatus = config.cloud?.autoSync || false
+  const statusIcon = currentStatus ? "✅" : "❌"
+  const statusText = currentStatus
+    ? t.commands.settings.autoSyncEnabled
+    : t.commands.settings.autoSyncDisabled
+
+  console.log(`
+🔄 ${t.commands.settings.autoSyncTitle}
+
+${statusIcon} ${t.commands.settings.autoSyncStatus}: ${statusText}
+
+${t.commands.settings.autoSyncUsage}:
+  /settings autoSync on     # ${t.commands.settings.autoSyncEnableHint}
+  /settings autoSync off    # ${t.commands.settings.autoSyncDisableHint}
+
+${t.commands.settings.autoSyncDescription}
+  `)
+} else if (autoSyncValue === "on" || autoSyncValue === "true" || autoSyncValue === "1") {
+  // Enable auto-sync
+  enableAutoSync()
+} else if (autoSyncValue === "off" || autoSyncValue === "false" || autoSyncValue === "0") {
+  // Disable auto-sync
+  disableAutoSync()
+} else {
+  // Invalid value
+  console.log(`
+❌ ${t.commands.settings.autoSyncInvalidValue}
+
+${t.commands.settings.autoSyncUsage}:
+  /settings autoSync on
+  /settings autoSync off
+  `)
+}
+```
+
+**Instructions for Claude:**
+
+Based on `autoSyncValue`:
+
+**If null (just `/settings autoSync`)** - Show current status:
+```
+🔄 Auto-Sync Settings
+
+✅ Status: Enabled
+   (or)
+❌ Status: Disabled
+
+Usage:
+  /settings autoSync on     # Enable auto-sync
+  /settings autoSync off    # Disable auto-sync
+
+When enabled, /planUpdate commands will automatically
+sync changes to PlanFlow cloud.
+```
+
+**If "on"** - Proceed to Step 2.3 (enable)
+**If "off"** - Proceed to Step 2.4 (disable)
+**If other value** - Show error:
+```
+❌ Invalid value. Use 'on' or 'off'.
+
+Usage:
+  /settings autoSync on
+  /settings autoSync off
+```
+
+**Step 2.3:** Enable auto-sync
+
+Pseudo-code:
+```javascript
+function enableAutoSync() {
+  // Read current config (prefer local for project-specific setting)
+  const localPath = "./.plan-config.json"
+  let localConfig = {}
+
+  if (fileExists(localPath)) {
+    try {
+      localConfig = JSON.parse(readFile(localPath))
+    } catch (error) {
+      localConfig = {}
+    }
+  }
+
+  // Ensure cloud section exists
+  if (!localConfig.cloud) {
+    localConfig.cloud = {}
+  }
+
+  // Enable auto-sync
+  localConfig.cloud.autoSync = true
+  localConfig.lastUsed = new Date().toISOString()
+
+  // Write back to local config
+  writeFile(localPath, JSON.stringify(localConfig, null, 2))
+
+  // Show success
+  console.log(`
+✅ ${t.commands.settings.autoSyncEnabledSuccess}
+
+🔄 ${t.commands.settings.autoSyncNowEnabled}
+
+${t.commands.settings.autoSyncWhatHappens}:
+  • /planUpdate T1.1 done → ${t.commands.settings.autoSyncAutoUpload}
+
+💡 ${t.commands.settings.autoSyncDisableHint}: /settings autoSync off
+  `)
+}
+```
+
+**Instructions for Claude:**
+
+1. Read `./.plan-config.json` (create if doesn't exist)
+2. Set `cloud.autoSync = true`
+3. Update `lastUsed` timestamp
+4. Write back to file
+5. Show success message:
+   ```
+   ✅ Auto-sync enabled!
+
+   🔄 Changes will now sync automatically after /planUpdate commands.
+
+   What happens:
+     • /planUpdate T1.1 done → Changes uploaded to cloud automatically
+
+   💡 To disable: /settings autoSync off
+   ```
+
+**Step 2.4:** Disable auto-sync
+
+Pseudo-code:
+```javascript
+function disableAutoSync() {
+  // Read current config
+  const localPath = "./.plan-config.json"
+  let localConfig = {}
+
+  if (fileExists(localPath)) {
+    try {
+      localConfig = JSON.parse(readFile(localPath))
+    } catch (error) {
+      localConfig = {}
+    }
+  }
+
+  // Ensure cloud section exists
+  if (!localConfig.cloud) {
+    localConfig.cloud = {}
+  }
+
+  // Disable auto-sync
+  localConfig.cloud.autoSync = false
+  localConfig.lastUsed = new Date().toISOString()
+
+  // Write back to local config
+  writeFile(localPath, JSON.stringify(localConfig, null, 2))
+
+  // Show success
+  console.log(`
+✅ ${t.commands.settings.autoSyncDisabledSuccess}
+
+🔄 ${t.commands.settings.autoSyncNowDisabled}
+
+${t.commands.settings.autoSyncManualSync}:
+  /sync push
+
+💡 ${t.commands.settings.autoSyncEnableHint}: /settings autoSync on
+  `)
+}
+```
+
+**Instructions for Claude:**
+
+1. Read `./.plan-config.json` (create if doesn't exist)
+2. Set `cloud.autoSync = false`
+3. Update `lastUsed` timestamp
+4. Write back to file
+5. Show success message:
+   ```
+   ✅ Auto-sync disabled!
+
+   🔄 Changes will no longer sync automatically.
+
+   To sync manually:
+     /sync push
+
+   💡 To enable: /settings autoSync on
+   ```
 
 **Then STOP. Action complete.**
 
@@ -691,11 +957,11 @@ ${t.commands.settings.availableCommands}
 
 Output:
 ```
-Usage: /plan:settings <command>
+Usage: /settings <command>
 
 Available Commands:
-- /plan:settings language    - Change language
-- /plan:settings reset       - Reset to defaults
+- /settings language    - Change language
+- /settings reset       - Reset to defaults
 ```
 
 Use translation keys for all text.
@@ -754,7 +1020,7 @@ Settings will apply for this session only`)
 ### Example 1: Show Settings (Hierarchical)
 
 ```bash
-$ /plan:settings
+$ /settings
 ```
 
 Output:
@@ -773,16 +1039,16 @@ Output:
   📅 Last Used: 2026-01-27T14:00:00Z
 
 Available Commands:
-- /plan:settings language           # Change global language
-- /plan:settings language --local   # Change project language
-- /plan:settings reset              # Reset global settings
-- /plan:settings reset --local      # Remove project settings
+- /settings language           # Change global language
+- /settings language --local   # Change project language
+- /settings reset              # Reset global settings
+- /settings reset --local      # Remove project settings
 ```
 
 ### Example 2: Change to Georgian (Global)
 
 ```bash
-$ /plan:settings language
+$ /settings language
 ```
 
 User selects: ქართული (Georgian)
@@ -800,13 +1066,13 @@ Output (in Georgian):
 • Wizard-ის კითხვებისთვის
 • გენერირებული PROJECT_PLAN.md ფაილებისთვის
 
-სცადეთ: /plan:new
+სცადეთ: /planNew
 ```
 
 ### Example 3: Change to Georgian (Project-Specific)
 
 ```bash
-$ /plan:settings language --local
+$ /settings language --local
 ```
 
 User selects: ქართული (Georgian)
@@ -824,13 +1090,13 @@ Output (in Georgian):
 • Wizard-ის კითხვებისთვის ამ პროექტში
 • გენერირებული PROJECT_PLAN.md ფაილებისთვის ამ პროექტში
 
-სცადეთ: /plan:new
+სცადეთ: /planNew
 ```
 
 ### Example 4: Reset Global Settings
 
 ```bash
-$ /plan:settings reset
+$ /settings reset
 ```
 
 Output:
@@ -846,7 +1112,7 @@ Reset to defaults:
 ### Example 5: Remove Project Settings
 
 ```bash
-$ /plan:settings reset --local
+$ /settings reset --local
 ```
 
 Output (if project had Georgian, now falls back to global English):
@@ -865,11 +1131,11 @@ Test cases to verify settings command with hierarchical config:
 ```bash
 # Test 1: Show settings (no configs exist)
 rm -f ./.plan-config.json ~/.config/claude/plan-plugin-config.json
-/plan:settings
+/settings
 # Should show default (English)
 
 # Test 2: Set global language to Georgian
-/plan:settings language
+/settings language
 # Select Georgian
 # Should show success in Georgian, global scope
 
@@ -878,11 +1144,11 @@ cat ~/.config/claude/plan-plugin-config.json
 # Should show: {"language":"ka",...}
 
 # Test 4: Show settings (global only)
-/plan:settings
+/settings
 # Should show Georgian as active (global source)
 
 # Test 5: Set project-specific language to English
-/plan:settings language --local
+/settings language --local
 # Select English
 # Should show success in English, local scope
 
@@ -891,12 +1157,12 @@ cat ./.plan-config.json
 # Should show: {"language":"en",...}
 
 # Test 7: Show settings (local overrides global)
-/plan:settings
+/settings
 # Should show English as active (local source)
 # Should show both local (English) and global (Georgian)
 
 # Test 8: Remove project settings
-/plan:settings reset --local
+/settings reset --local
 # Should remove ./.plan-config.json
 # Should show now using global (Georgian)
 
@@ -905,11 +1171,11 @@ ls ./.plan-config.json
 # Should not exist
 
 # Test 10: Show settings (global active again)
-/plan:settings
+/settings
 # Should show Georgian as active (global source)
 
 # Test 11: Reset global settings
-/plan:settings reset
+/settings reset
 # Should reset global to English
 
 # Test 12: Verify global reset
@@ -918,17 +1184,17 @@ cat ~/.config/claude/plan-plugin-config.json
 
 # Test 13: Corrupted local config
 echo 'invalid json' > ./.plan-config.json
-/plan:settings
+/settings
 # Should fall back to global, show warning
 
 # Test 14: Corrupted global config (no local)
 rm ./.plan-config.json
 echo 'invalid json' > ~/.config/claude/plan-plugin-config.json
-/plan:settings
+/settings
 # Should fall back to default (English), show warning
 
 # Test 15: Help (unknown command)
-/plan:settings unknown
+/settings unknown
 # Should show usage help
 ```
 

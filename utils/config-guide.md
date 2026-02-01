@@ -41,6 +41,8 @@ Default (en)
 
 ## 📝 Config File Structure
 
+### Basic Config (v1.1.1)
+
 ```json
 {
   "language": "ka",
@@ -48,6 +50,87 @@ Default (en)
   "lastUsed": "2026-01-27T12:00:00Z"
 }
 ```
+
+### Extended Config with Cloud (v1.2.0+)
+
+```json
+{
+  "language": "ka",
+  "defaultProjectType": "fullstack",
+  "lastUsed": "2026-01-27T12:00:00Z",
+  "cloud": {
+    "apiUrl": "https://api.planflow.tools",
+    "apiToken": "pf_xxx...",
+    "projectId": "uuid-of-linked-project",
+    "userId": "uuid",
+    "userEmail": "user@example.com",
+    "autoSync": false,
+    "storageMode": "hybrid",
+    "lastSyncedAt": null
+  }
+}
+```
+
+### Storage Mode Configuration (v1.3.0+)
+
+The `storageMode` option controls how the plugin handles data synchronization:
+
+```json
+{
+  "cloud": {
+    "storageMode": "hybrid"
+  }
+}
+```
+
+#### Available Modes
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| `local` | PROJECT_PLAN.md only, no auto-sync | Offline work, no cloud needed |
+| `cloud` | Cloud is source of truth, local is cache | Team collaboration, always online |
+| `hybrid` | Both local and cloud, with smart merge | Best of both worlds (default for authenticated users) |
+
+#### Mode Behaviors
+
+**`local` Mode:**
+- All changes saved to PROJECT_PLAN.md only
+- No automatic cloud synchronization
+- Manual sync still available via `/sync push` and `/sync pull`
+- Best for offline work or when cloud is not needed
+
+**`cloud` Mode:**
+- Cloud is the authoritative source
+- Local PROJECT_PLAN.md acts as a cache
+- Every `/update` immediately syncs with cloud
+- If cloud is unavailable, operations may fail
+- Best for teams requiring real-time collaboration
+
+**`hybrid` Mode (Default):**
+- Both local and cloud are kept in sync
+- Smart merge algorithm handles concurrent changes
+- Local changes work offline, sync when online
+- Conflicts are detected and user is prompted to resolve
+- Best for most users who want flexibility
+
+#### Default Behavior
+
+- **Not authenticated**: Defaults to `local` mode
+- **Authenticated without explicit setting**: Defaults to `hybrid` mode
+- **Explicit setting**: Uses the configured mode
+
+### Cloud Config Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `cloud.apiUrl` | string | `"https://api.planflow.tools"` | API base URL |
+| `cloud.apiToken` | string | `null` | User's API token (pf_xxx...) |
+| `cloud.projectId` | string | `null` | Linked cloud project UUID |
+| `cloud.userId` | string | `null` | User's UUID from API |
+| `cloud.userEmail` | string | `null` | User's email from API |
+| `cloud.autoSync` | boolean | `false` | Auto-sync on /update |
+| `cloud.storageMode` | string | `"hybrid"` | Storage mode: "local", "cloud", or "hybrid" (v1.3.0+) |
+| `cloud.lastSyncedAt` | string | `null` | ISO 8601 timestamp of last sync |
 
 ## 🔍 Reading Config (Hierarchical)
 
@@ -112,6 +195,16 @@ function getConfig() {
 const config = getConfig()
 const userLanguage = config.language  // "ka" or "en"
 const configSource = config._source    // "local", "global", or "default"
+
+// Cloud config (v1.2.0+)
+const cloudConfig = config.cloud || {}
+const isAuthenticated = !!cloudConfig.apiToken
+const apiUrl = cloudConfig.apiUrl || "https://api.planflow.tools"
+const autoSync = cloudConfig.autoSync || false
+
+// Storage mode (v1.3.0+)
+// Defaults: "local" if not authenticated, "hybrid" if authenticated
+const storageMode = cloudConfig.storageMode || (isAuthenticated ? "hybrid" : "local")
 \`\`\`
 ```
 
@@ -185,7 +278,7 @@ writeFile(configPath, JSON.stringify(config, null, 2))
 ### Instructions for Claude - Saving Config
 
 ```markdown
-When user changes settings (e.g., /plan:settings language):
+When user changes settings (e.g., /settings language):
 
 **Step 1:** Read current config
 
@@ -229,7 +322,7 @@ Show success message using new language!
 
 ## 🔧 Config Fields
 
-### Available Fields
+### Available Fields (v1.1.1)
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -237,13 +330,28 @@ Show success message using new language!
 | `defaultProjectType` | string | `"fullstack"` | Default project type for wizard |
 | `lastUsed` | string | current date | Last time plugin was used (ISO 8601) |
 
-### Future Fields (v1.2+)
+### Cloud Fields (v1.2.0+)
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `cloud` | object | `{}` | Cloud integration settings |
+| `cloud.apiUrl` | string | `"https://api.planflow.tools"` | API endpoint base URL |
+| `cloud.apiToken` | string | `null` | API token for authentication |
+| `cloud.projectId` | string | `null` | UUID of linked cloud project |
+| `cloud.userId` | string | `null` | User's UUID (from /auth/me) |
+| `cloud.userEmail` | string | `null` | User's email (from /auth/me) |
+| `cloud.autoSync` | boolean | `false` | Auto-sync on task updates |
+| `cloud.storageMode` | string | `"hybrid"` | Storage mode: "local" \| "cloud" \| "hybrid" (v1.3.0+) |
+| `cloud.lastSyncedAt` | string | `null` | Last sync timestamp (ISO 8601) |
+
+### Future Fields (v1.3+)
 
 ```json
 {
   "language": "ka",
   "defaultProjectType": "fullstack",
   "lastUsed": "2026-01-27T12:00:00Z",
+  "cloud": { ... },
   "theme": "dark",                    // Future
   "autoSave": true,                   // Future
   "notifications": true               // Future
@@ -285,7 +393,7 @@ Now safe to write:
 ```markdown
 ## Complete Flow: User Changes Language to Georgian
 
-User runs: /plan:settings language
+User runs: /settings language
 User selects: ქართული (Georgian)
 
 **Step 1:** Create directory (if needed)
@@ -356,6 +464,183 @@ Using default settings
 \`\`\`
 ```
 
+## ☁️ Cloud Config Operations (v1.2.0+)
+
+### Checking Authentication Status
+
+```javascript
+function isAuthenticated(config) {
+  return !!(config.cloud && config.cloud.apiToken)
+}
+
+function getCloudConfig(config) {
+  return {
+    apiUrl: config.cloud?.apiUrl || "https://api.planflow.tools",
+    apiToken: config.cloud?.apiToken || null,
+    projectId: config.cloud?.projectId || null,
+    userId: config.cloud?.userId || null,
+    userEmail: config.cloud?.userEmail || null,
+    autoSync: config.cloud?.autoSync || false,
+    lastSyncedAt: config.cloud?.lastSyncedAt || null
+  }
+}
+```
+
+### Saving Cloud Credentials
+
+After successful login, save credentials:
+
+```javascript
+function saveCloudCredentials(config, credentials, scope = "global") {
+  // Ensure cloud object exists
+  config.cloud = config.cloud || {}
+
+  // Update cloud settings
+  config.cloud.apiToken = credentials.token
+  config.cloud.userId = credentials.userId
+  config.cloud.userEmail = credentials.email
+  config.cloud.apiUrl = credentials.apiUrl || "https://api.planflow.tools"
+
+  // Save to appropriate config file
+  const configPath = scope === "local"
+    ? "./.plan-config.json"
+    : expandPath("~/.config/claude/plan-plugin-config.json")
+
+  writeFile(configPath, JSON.stringify(config, null, 2))
+}
+```
+
+### Clearing Cloud Credentials (Logout)
+
+```javascript
+function clearCloudCredentials(config, scope = "global") {
+  if (config.cloud) {
+    // Remove sensitive data
+    delete config.cloud.apiToken
+    delete config.cloud.userId
+    delete config.cloud.userEmail
+    delete config.cloud.projectId
+    config.cloud.lastSyncedAt = null
+  }
+
+  // Save updated config
+  const configPath = scope === "local"
+    ? "./.plan-config.json"
+    : expandPath("~/.config/claude/plan-plugin-config.json")
+
+  writeFile(configPath, JSON.stringify(config, null, 2))
+}
+```
+
+### Linking to Cloud Project
+
+```javascript
+function linkCloudProject(config, projectId) {
+  config.cloud = config.cloud || {}
+  config.cloud.projectId = projectId
+
+  // Always save to local config (project-specific)
+  writeFile("./.plan-config.json", JSON.stringify(config, null, 2))
+}
+```
+
+### Updating Sync Timestamp
+
+```javascript
+function updateSyncTimestamp(config) {
+  config.cloud = config.cloud || {}
+  config.cloud.lastSyncedAt = new Date().toISOString()
+
+  // Save to local config
+  writeFile("./.plan-config.json", JSON.stringify(config, null, 2))
+}
+```
+
+### Getting Storage Mode (v1.3.0+)
+
+```javascript
+function getStorageMode(config) {
+  const cloudConfig = config.cloud || {}
+  const isAuthenticated = !!cloudConfig.apiToken
+
+  // If explicitly set, use that
+  if (cloudConfig.storageMode) {
+    return cloudConfig.storageMode
+  }
+
+  // Default based on authentication status
+  return isAuthenticated ? "hybrid" : "local"
+}
+
+// Usage
+const mode = getStorageMode(config)
+// Returns: "local" | "cloud" | "hybrid"
+```
+
+### Setting Storage Mode (v1.3.0+)
+
+```javascript
+function setStorageMode(config, mode, scope = "local") {
+  // Validate mode
+  const validModes = ["local", "cloud", "hybrid"]
+  if (!validModes.includes(mode)) {
+    throw new Error(`Invalid storage mode: ${mode}. Use: ${validModes.join(", ")}`)
+  }
+
+  // Check authentication for cloud modes
+  const isAuthenticated = !!(config.cloud && config.cloud.apiToken)
+  if ((mode === "cloud" || mode === "hybrid") && !isAuthenticated) {
+    throw new Error("Cloud modes require authentication. Run /login first.")
+  }
+
+  // Ensure cloud object exists
+  config.cloud = config.cloud || {}
+  config.cloud.storageMode = mode
+
+  // Save to appropriate config file
+  const configPath = scope === "local"
+    ? "./.plan-config.json"
+    : expandPath("~/.config/claude/plan-plugin-config.json")
+
+  writeFile(configPath, JSON.stringify(config, null, 2))
+
+  return mode
+}
+
+// Usage
+setStorageMode(config, "hybrid", "local")
+```
+
+### Storage Mode Behavior Check (v1.3.0+)
+
+```javascript
+function shouldSyncToCloud(config) {
+  const mode = getStorageMode(config)
+  const cloudConfig = config.cloud || {}
+
+  switch (mode) {
+    case "local":
+      return false  // Never auto-sync
+    case "cloud":
+      return true   // Always sync immediately
+    case "hybrid":
+      return cloudConfig.autoSync === true  // Sync if autoSync enabled
+    default:
+      return false
+  }
+}
+
+function shouldPullBeforePush(config) {
+  const mode = getStorageMode(config)
+  return mode === "hybrid"  // Only hybrid mode does smart merge
+}
+
+function isCloudRequired(config) {
+  const mode = getStorageMode(config)
+  return mode === "cloud"  // Only cloud mode requires connectivity
+}
+```
+
 ## 💡 Best Practices
 
 1. **Always use defaults** if config doesn't exist
@@ -364,6 +649,9 @@ Using default settings
 4. **Handle JSON parsing errors** gracefully
 5. **Update `lastUsed`** whenever writing config
 6. **Use ISO 8601** for timestamps
+7. **Store apiToken in global config** (user-wide authentication)
+8. **Store projectId in local config** (project-specific linking)
+9. **Never log or display full apiToken** (security)
 
 ## 🧪 Testing Config System
 

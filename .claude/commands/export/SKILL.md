@@ -9,10 +9,10 @@ Export tasks and project information from PROJECT_PLAN.md to various formats for
 ## Usage
 
 ```bash
-/plan:export github         # Export as GitHub Issues
-/plan:export json           # Export as JSON
-/plan:export summary        # Export as Markdown summary
-/plan:export csv            # Export as CSV (optional)
+/export github         # Export as GitHub Issues
+/export json           # Export as JSON
+/export summary        # Export as Markdown summary
+/export csv            # Export as CSV (optional)
 ```
 
 ## Process
@@ -88,8 +88,8 @@ Supported formats:
   summary   - Create Markdown summary
   csv       - Export as CSV
 
-Usage: /plan:export <format>
-Example: /plan:export json
+Usage: /export <format>
+Example: /export json
 ```
 
 ### Step 2: Read PROJECT_PLAN.md
@@ -564,9 +564,9 @@ Exported file created with available data.
 ### Export with Filters
 
 ```bash
-/plan:export github --phase 1
-/plan:export json --status TODO
-/plan:export summary --complexity High
+/export github --phase 1
+/export json --status TODO
+/export summary --complexity High
 ```
 
 Allow filtering by phase, status, or complexity (future enhancement).
@@ -576,7 +576,7 @@ Allow filtering by phase, status, or complexity (future enhancement).
 After exporting to GitHub, optionally sync back:
 ```
 💡 To sync issue updates back to PROJECT_PLAN.md:
-   /plan:sync github
+   /sync github
 
 This will update task statuses based on GitHub issue states.
 ```

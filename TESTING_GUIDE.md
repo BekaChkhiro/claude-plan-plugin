@@ -10,7 +10,7 @@
 # 1. წაშალეთ config თუ არსებობს
 rm ~/.config/claude/plan-plugin-config.json 2>/dev/null
 
-# 2. გაუშვით /plan:settings
+# 2. გაუშვით /settings
 # Expected output: Language: English
 
 # 3. შექმენით plan ინგლისურად
@@ -34,7 +34,7 @@ rm ~/.config/claude/plan-plugin-config.json 2>/dev/null
 **მიზანი:** შემოწმება language switching-ის
 
 ```bash
-# 1. გაუშვით /plan:settings language
+# 1. გაუშვით /settings language
 # 2. აირჩიეთ: ქართული (Georgian)
 
 # Expected output in Georgian:
@@ -65,7 +65,7 @@ cat ~/.config/claude/plan-plugin-config.json
 
 ```bash
 # 1. დარწმუნდით რომ language არის "ka" (Test 2-დან)
-# 2. გაუშვით /plan:new
+# 2. გაუშვით /new
 ```
 
 **Expected Wizard Output (Georgian):**
@@ -97,8 +97,8 @@ cat ~/.config/claude/plan-plugin-config.json
 
 შემდეგი ნაბიჯები:
 1. განიხილეთ გეგმა და საჭიროების შემთხვევაში შეცვალეთ
-2. დაიწყეთ: /plan:next (შემდეგი ამოცანის მისაღებად)
-3. განაახლეთ პროგრესი: /plan:update T1.1 start
+2. დაიწყეთ: /next (შემდეგი ამოცანის მისაღებად)
+3. განაახლეთ პროგრესი: /update T1.1 start
 ```
 
 **Expected PROJECT_PLAN.md Content:**
@@ -166,8 +166,8 @@ graph TB
 ```bash
 # Prerequisites: Test 3 completed (PROJECT_PLAN.md exists)
 
-# Test /plan:next
-/plan:next
+# Test /next
+/next
 ```
 
 **Expected Output (Georgian):**
@@ -189,8 +189,8 @@ T1.1: პროექტის დაყენება
 ```
 
 ```bash
-# Test /plan:update
-/plan:update T1.1 start
+# Test /update
+/update T1.1 start
 ```
 
 **Expected Output (Georgian):**
@@ -208,12 +208,12 @@ T1.1: პროექტის დაყენება
 
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 0%
 
-🎯 შემდეგი: /plan:next (რეკომენდაციის მისაღებად)
+🎯 შემდეგი: /next (რეკომენდაციის მისაღებად)
 ```
 
 ```bash
 # Test task completion
-/plan:update T1.1 done
+/update T1.1 done
 ```
 
 **Expected Output (Georgian):**
@@ -234,7 +234,7 @@ T1.1: პროექტის დაყენება
 🔓 განბლოკილი ამოცანები:
   - T1.2: მონაცემთა ბაზის დაყენება
 
-🎯 შემდეგი: /plan:next (რეკომენდაციის მისაღებად)
+🎯 შემდეგი: /next (რეკომენდაციის მისაღებად)
 ```
 
 ---
@@ -244,7 +244,7 @@ T1.1: პროექტის დაყენება
 **მიზანი:** შემოწმება language switching უკან
 
 ```bash
-# 1. გაუშვით /plan:settings language
+# 1. გაუშვით /settings language
 # 2. აირჩიეთ: English
 ```
 
@@ -272,7 +272,7 @@ cat ~/.config/claude/plan-plugin-config.json
 
 ```bash
 # Test that next commands use English
-/plan:next
+/next
 # Should show English output: "🎯 Recommended Next Task"
 ```
 
@@ -324,7 +324,7 @@ Should render as:
 # Prerequisites: Georgian language set, PROJECT_PLAN.md exists
 
 # Test JSON export
-/plan:export json
+/export json
 ```
 
 **Expected Output (Georgian):**
@@ -357,7 +357,7 @@ JSON export-ის ჩაწერა...
 echo 'invalid json content' > ~/.config/claude/plan-plugin-config.json
 
 # 2. გაუშვით რომელიმე command
-/plan:settings
+/settings
 ```
 
 **Expected Behavior:**
@@ -377,7 +377,7 @@ echo 'invalid json content' > ~/.config/claude/plan-plugin-config.json
 echo '{"language":"fr","lastUsed":"2026-01-27"}' > ~/.config/claude/plan-plugin-config.json
 
 # 2. Run command
-/plan:next
+/next
 ```
 
 **Expected Behavior:**
@@ -394,11 +394,11 @@ echo '{"language":"fr","lastUsed":"2026-01-27"}' > ~/.config/claude/plan-plugin-
 
 ```bash
 # Set Georgian
-/plan:settings language
+/settings language
 # Select Georgian
 
 # View settings
-/plan:settings
+/settings
 ```
 
 **Expected Output (Georgian):**
@@ -410,8 +410,8 @@ echo '{"language":"fr","lastUsed":"2026-01-27"}' > ~/.config/claude/plan-plugin-
 📅 ბოლოს გამოყენებული: 2026-01-27T...
 
 ხელმისაწვდომი ბრძანებები:
-- /plan:settings language    - ენის შეცვლა
-- /plan:settings reset       - პარამეტრების გადატვირთვა
+- /settings language    - ენის შეცვლა
+- /settings reset       - პარამეტრების გადატვირთვა
 ```
 
 ---
@@ -472,12 +472,12 @@ None currently - all features working as expected!
 **სწრაფი smoke test:**
 ```bash
 cd ~/test-plan
-/plan:settings language  # Select Georgian
-/plan:new               # Create plan in Georgian
+/settings language  # Select Georgian
+/new               # Create plan in Georgian
 cat PROJECT_PLAN.md | head -30  # Verify Georgian sections
-/plan:next             # Check task recommendation in Georgian
-/plan:settings language  # Switch back to English
-/plan:next             # Verify English output
+/next             # Check task recommendation in Georgian
+/settings language  # Switch back to English
+/next             # Verify English output
 ```
 
 თუ ყველა ეს მუშაობს - multi-language feature სრულად functional არის! 🎉

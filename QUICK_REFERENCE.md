@@ -106,18 +106,18 @@ git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/.config/claude
 claude
 
 # Create plan
-/plan:new
+/new
 
 # Get next task
-/plan:next
+/next
 
 # Update task
-/plan:update T1.1 start
-/plan:update T1.1 done
+/update T1.1 start
+/update T1.1 done
 
 # Export
-/plan:export json
-/plan:export summary
+/export json
+/export summary
 ```
 
 ---
@@ -130,10 +130,10 @@ plan-plugin/
 │   └── plugin.json           # Plugin config
 │
 ├── commands/                  # Slash commands
-│   ├── new/SKILL.md          # /plan:new
-│   ├── update/SKILL.md       # /plan:update
-│   ├── next/SKILL.md         # /plan:next
-│   └── export/SKILL.md       # /plan:export
+│   ├── new/SKILL.md          # /new
+│   ├── update/SKILL.md       # /update
+│   ├── next/SKILL.md         # /next
+│   └── export/SKILL.md       # /export
 │
 ├── skills/                    # AI skills
 │   ├── analyze-codebase/
@@ -175,11 +175,11 @@ nano commands/status/SKILL.md
 # 3. დაწერე instructions Claude-სთვის
 # 4. Test
 claude
-/plan:status
+/status
 
 # 5. Commit
 git add commands/status/
-git commit -m "Add /plan:status command"
+git commit -m "Add /status command"
 git push
 ```
 
@@ -191,7 +191,7 @@ nano templates/fullstack.template.md
 
 # 2. Test generation
 claude
-/plan:new
+/new
 
 # 3. Verify PROJECT_PLAN.md looks good
 
@@ -270,10 +270,10 @@ cd /home/bekolozi/Desktop/plan-plugin
 
 # Manual tests
 claude
-/plan:new      # Should start wizard
-/plan:next     # Should recommend task
-/plan:update   # Should show usage
-/plan:export   # Should show formats
+/new      # Should start wizard
+/next     # Should recommend task
+/update   # Should show usage
+/export   # Should show formats
 ```
 
 ---
