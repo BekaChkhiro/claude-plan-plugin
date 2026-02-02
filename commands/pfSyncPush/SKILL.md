@@ -68,28 +68,90 @@ Run: /pfCloudLink
 
 ## Step 3: Push to Cloud
 
-1. Read PROJECT_PLAN.md
-2. PUT to API
-3. Update lastSyncedAt in config
+**IMPORTANT: Follow these steps exactly!**
 
-**API Call:**
+1. Read PROJECT_PLAN.md using the Read tool
+2. Create JSON payload using Bash with jq
+3. Make API call and parse response
+4. Show task count from response
+5. Update lastSyncedAt in config
+
+**Step 3a: Create JSON payload**
 ```bash
 cat PROJECT_PLAN.md > /tmp/plan_content.txt
-jq -n --rawfile content /tmp/plan_content.txt '{"plan": $content}' > /tmp/payload.json
-curl -s -X PUT \
+jq -n --rawfile plan /tmp/plan_content.txt '{"plan": $plan}' > /tmp/payload.json
+```
+
+**Step 3b: Make API call**
+```bash
+curl -s -w "\n%{http_code}" -X PUT \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {TOKEN}" \
   -d @/tmp/payload.json \
   "https://api.planflow.tools/projects/{PROJECT_ID}/plan"
 ```
 
-**Success:**
+**Step 3c: Parse response**
+
+The API returns:
+```json
+{
+  "success": true,
+  "data": {
+    "projectId": "uuid",
+    "projectName": "My Project",
+    "tasksCount": 15,
+    "completedCount": 3,
+    "progress": 20
+  }
+}
+```
+
+Extract `tasksCount`, `completedCount`, and `progress` from response.
+
+**Success output (MUST show task count):**
 ```
 ✅ {t.commands.sync.pushSuccess}
 
-  {t.commands.sync.uploaded} PROJECT_PLAN.md
-  {t.commands.sync.to} My Project
-  {t.commands.sync.at} 2024-01-15 14:30:00
+📊 Sync Details:
+   Project: {projectName}
+   Tasks synced: {tasksCount}
+   Completed: {completedCount}
+   Progress: {progress}%
+
+🕐 Synced at: {timestamp}
+```
+
+**If tasksCount is 0 or null:**
+```
+⚠️ Warning: No tasks were parsed from the plan.
+
+This could mean:
+- The plan format is not recognized
+- Tasks should use format: #### T1.1: Task Name
+- Or table format: | T1.1 | Task Name | Low | TODO | - |
+
+Run /planNext to verify your plan format.
+```
+
+## Step 4: Update Local Config
+
+After successful sync, update `.plan-config.json` with the sync timestamp:
+
+```javascript
+// Read current config
+const configPath = "./.plan-config.json"
+let config = {}
+if (fileExists(configPath)) {
+  config = JSON.parse(readFile(configPath))
+}
+
+// Update lastSyncedAt
+if (!config.cloud) config.cloud = {}
+config.cloud.lastSyncedAt = new Date().toISOString()
+
+// Write back
+writeFile(configPath, JSON.stringify(config, null, 2))
 ```
 
 ## Error Handling
@@ -99,6 +161,21 @@ curl -s -X PUT \
 ❌ {t.commands.sync.noPlan}
 
 Run: /planNew to create a plan first.
+```
+
+**HTTP 401 - Unauthorized:**
+```
+❌ Authentication failed. Your token may have expired.
+
+Run: /pfLogin to re-authenticate.
+```
+
+**HTTP 404 - Project not found:**
+```
+❌ Project not found on cloud.
+
+The linked project may have been deleted.
+Run: /pfCloudLink to link a different project.
 ```
 
 **Network Error:**
