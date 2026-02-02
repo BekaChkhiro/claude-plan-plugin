@@ -215,6 +215,33 @@ Get your API token at: https://planflow.tools/dashboard/settings/tokens
 /pfSyncPull
 ```
 
+### Team Management Commands
+
+Manage team members and task assignments in your cloud projects.
+
+**Team Commands:**
+```bash
+/pfTeamList                          # List team members
+/pfTeamInvite alice@company.com      # Invite with default role (editor)
+/pfTeamInvite bob@company.com admin  # Invite with specific role
+/pfTeamRemove bob@company.com        # Remove from team
+/pfTeamRole bob@company.com viewer   # Change member role
+```
+
+**Task Assignment:**
+```bash
+/pfAssign T2.1 jane@company.com      # Assign task to team member
+/pfAssign T2.1 me                    # Assign task to yourself
+```
+
+**Available Roles:**
+| Role | Permissions |
+|------|-------------|
+| `owner` | Full access, can delete project |
+| `admin` | Full access, can manage team members |
+| `editor` | Can edit tasks and plan (default) |
+| `viewer` | Read-only access |
+
 ### Auto-Sync Feature
 
 Enable automatic sync after task updates using the settings command:
@@ -561,7 +588,12 @@ plan-plugin/
 │   ├── pfCloudList/             # /pfCloudList
 │   ├── pfCloudLink/             # /pfCloudLink
 │   ├── pfCloudUnlink/           # /pfCloudUnlink
-│   └── pfCloudNew/              # /pfCloudNew
+│   ├── pfCloudNew/              # /pfCloudNew
+│   ├── pfTeamList/              # /pfTeamList
+│   ├── pfTeamInvite/            # /pfTeamInvite
+│   ├── pfTeamRemove/            # /pfTeamRemove
+│   ├── pfTeamRole/              # /pfTeamRole
+│   └── pfAssign/                # /pfAssign
 ├── skills/
 │   ├── analyze-codebase/        # Codebase analysis
 │   ├── suggest-breakdown/       # Task breakdown

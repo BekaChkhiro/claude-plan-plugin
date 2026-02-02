@@ -410,6 +410,34 @@
       "storageModeHybridBehavior": "• Both local and cloud kept in sync\n• Smart merge for concurrent changes\n• Works offline, syncs when online"
     },
 
+    "assign": {
+      "title": "Task Assignment",
+      "usage": "Usage:",
+      "usageEmail": "Assign to team member by email",
+      "usageMe": "Assign to yourself",
+      "example": "Examples:",
+      "success": "Task assigned!",
+      "task": "Task:",
+      "assignedTo": "Assigned to:",
+      "project": "Project:",
+      "selfAssignHint": "Ready to start working? Run:",
+      "notifyHint": "They'll be notified of this assignment.",
+      "invalidTaskId": "Invalid task ID format.",
+      "taskIdExample": "Task ID should be like: T1.1, T2.3, T10.5",
+      "invalidEmail": "Invalid email format.",
+      "emailExample": "Example: jane@company.com or use 'me'",
+      "taskNotFound": "Task not found.",
+      "checkTaskId": "Make sure the task exists. Run /pfSyncPush to sync your local tasks.",
+      "userNotMember": "User is not a team member.",
+      "notMemberHint": "is not part of this project.",
+      "inviteFirst": "Invite them first:",
+      "noPermission": "You don't have permission to assign tasks.",
+      "noPermissionHint": "Only editors and above can assign tasks.",
+      "alreadyAssigned": "Task is already assigned.",
+      "reassignHint": "To reassign:",
+      "tryAgain": "Please check your connection and try again."
+    },
+
     "team": {
       "title": "Team Members",
       "project": "Project",
