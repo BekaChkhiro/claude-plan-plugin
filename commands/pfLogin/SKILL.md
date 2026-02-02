@@ -1,3 +1,8 @@
+---
+name: pfLogin
+description: PlanFlow Login
+---
+
 # PlanFlow Login
 
 Authenticate with PlanFlow project management service.
@@ -110,8 +115,9 @@ Save to global config (`~/.config/claude/plan-plugin-config.json`):
   {t.commands.login.token} My CLI Token
 
 {t.commands.login.nowYouCan}
-  • /pfSync - Sync with cloud
-  • /pfCloud - Manage projects
+  • /pfSyncPush - Push local to cloud
+  • /pfSyncPull - Pull from cloud
+  • /pfCloudList - List your projects
 ```
 
 ## Error Handling

@@ -1,3 +1,8 @@
+---
+name: pfWhoami
+description: PlanFlow Who Am I
+---
+
 # PlanFlow Who Am I
 
 Display current PlanFlow user information and connection status.

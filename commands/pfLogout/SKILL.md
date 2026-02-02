@@ -1,3 +1,8 @@
+---
+name: pfLogout
+description: PlanFlow Logout
+---
+
 # PlanFlow Logout
 
 Clear PlanFlow credentials and disconnect from cloud.

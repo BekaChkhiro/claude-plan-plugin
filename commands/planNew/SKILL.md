@@ -1,3 +1,8 @@
+---
+name: planNew
+description: Plan Creation Wizard
+---
+
 # Plan Creation Wizard
 
 You are an expert project planning assistant. Your role is to guide users through an interactive wizard to create comprehensive project plans.

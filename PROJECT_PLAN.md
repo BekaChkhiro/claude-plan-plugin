@@ -6,7 +6,7 @@
 **Goal:** Connect local planning commands to planflow.tools cloud platform
 **Created:** 2026-01-31
 **Status:** Complete ✅
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-02
 **Current Phase:** Complete - All Phases Done ✅
 
 ---
@@ -66,10 +66,10 @@
 ## Progress Tracking
 
 ### Overall Status
-**Total Tasks**: 61 (25 complete + 36 new)
-**Completed**: 25 🟩🟩🟩🟩🟩░░░░░ (41%)
+**Total Tasks**: 61 (27 complete + 34 remaining)
+**Completed**: 27 🟩🟩🟩🟩░░░░░░ (44%)
 **In Progress**: 0
-**TODO**: 36
+**TODO**: 35
 
 ### Phase Progress
 - 🔧 Phase 1: Foundation → 4/4 (100%) ✅
@@ -79,7 +79,7 @@
 - 🧪 Phase 5: Testing & Polish → 2/2 (100%) ✅
 - 🔀 Phase 6: Hybrid Sync → 6/6 (100%) ✅
 - 📚 Phase 7: MCP Documentation → 3/3 (100%) ✅
-- 👥 Phase 8: Team Management → 0/5 (0%) 🆕
+- 👥 Phase 8: Team Management → 2/5 (40%)
 - 📋 Phase 9: Task Assignment → 0/6 (0%) 🆕
 - 💬 Phase 10: Comments & Activity → 0/5 (0%) 🆕
 - 🔔 Phase 11: Notifications → 0/5 (0%) 🆕
@@ -950,8 +950,8 @@ Task T1.1: "Setup authentication"
 
 | ID    | Task                                          | Complexity | Status | Dependencies |
 | ----- | --------------------------------------------- | ---------- | ------ | ------------ |
-| T8.1  | Create /team list command                     | Low        | TODO   | Platform T5.1 |
-| T8.2  | Create /team invite command                   | Medium     | TODO   | Platform T5.2 |
+| T8.1  | Create /team list command                     | Low        | DONE ✅ | Platform T5.1 |
+| T8.2  | Create /team invite command                   | Medium     | DONE ✅ | Platform T5.2 |
 | T8.3  | Create /team remove command                   | Low        | TODO   | T8.1         |
 | T8.4  | Create /team role command                     | Low        | TODO   | Platform T5.3 |
 | T8.5  | Add team translations (en.json, ka.json)      | Low        | TODO   | T8.1         |

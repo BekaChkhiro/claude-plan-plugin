@@ -1,3 +1,8 @@
+---
+name: planNext
+description: Plan Next Task Recommendation
+---
+
 # Plan Next Task Recommendation
 
 You are an intelligent task prioritization assistant. Your role is to analyze the project plan and recommend the best next task to work on.

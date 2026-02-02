@@ -9,7 +9,7 @@ Starting a large project can be overwhelming. This plugin solves that by providi
 - **Interactive Project Wizard** (`/planNew`) - Asks the right questions and generates a comprehensive plan
 - **Smart Task Suggestions** (`/planNext`) - Tells you exactly what to work on next
 - **Progress Tracking** (`/planUpdate`) - Simple checkbox-based progress management
-- **Export Options** (`/planExport`) - GitHub Issues, JSON, and more
+- **Export Options** (`/planExportGithub`, `/planExportJson`, etc.) - GitHub Issues, JSON, and more
 
 ## 📦 Installation
 
@@ -112,29 +112,32 @@ Mark tasks as started, completed, or blocked.
 /planUpdate T2.3 block    # Mark as blocked
 ```
 
-### `/planExport` - Export Plan
+### Export Commands
 
 Export your plan to different formats.
 
-**Usage:**
+**Available Commands:**
 ```bash
-/planExport github        # Create GitHub Issues
-/planExport json          # Export as JSON
-/planExport summary       # Markdown summary
+/planExportGithub         # Create GitHub Issues
+/planExportJson           # Export as JSON
+/planExportSummary        # Markdown summary
+/planExportCsv            # Export as CSV
 ```
 
-### `/planSettings` - Plugin Settings
+### Settings Commands
 
 Configure language preferences, auto-sync, and other plugin settings.
 
-**Usage:**
+**Available Commands:**
 ```bash
-/planSettings              # View current settings
-/planSettings language     # Change language
-/planSettings autoSync     # Show auto-sync status
-/planSettings autoSync on  # Enable auto-sync
-/planSettings autoSync off # Disable auto-sync
-/planSettings reset        # Reset to defaults
+/planSettingsShow              # View current settings
+/planSettingsLanguage          # Change language (global)
+/planSettingsLanguage --local  # Change language (project only)
+/planSettingsAutoSync          # Show auto-sync status
+/planSettingsAutoSync on       # Enable auto-sync
+/planSettingsAutoSync off      # Disable auto-sync
+/planSettingsReset             # Reset global settings
+/planSettingsReset --local     # Remove project settings
 ```
 
 ## ☁️ Cloud Features (v1.5.0)
@@ -152,25 +155,25 @@ Connect your local plans to PlanFlow Cloud for backup, collaboration, and cross-
 
 Get your API token at: https://planflow.tools/dashboard/settings/tokens
 
-### `/pfSync` - Sync with Cloud
+### Sync Commands
 
 ```bash
-/pfSync                   # Show sync status (default)
-/pfSync push              # Upload local → cloud
-/pfSync push --force      # Overwrite cloud without conflict check
-/pfSync pull              # Download cloud → local
-/pfSync pull --force      # Overwrite local without confirmation
+/pfSyncStatus             # Show sync status
+/pfSyncPush               # Upload local → cloud
+/pfSyncPush --force       # Overwrite cloud without conflict check
+/pfSyncPull               # Download cloud → local
+/pfSyncPull --force       # Overwrite local without confirmation
 ```
 
-### `/pfCloud` - Manage Cloud Projects
+### Cloud Project Commands
 
 ```bash
-/pfCloud                  # List all your cloud projects
-/pfCloud link             # Interactive project selection
-/pfCloud link <id>        # Link to specific project
-/pfCloud unlink           # Disconnect from cloud project
-/pfCloud new              # Create new cloud project from local plan
-/pfCloud new "Name"       # Create with custom name
+/pfCloudList              # List all your cloud projects
+/pfCloudLink              # Interactive project selection
+/pfCloudLink <id>         # Link to specific project
+/pfCloudUnlink            # Disconnect from cloud project
+/pfCloudNew               # Create new cloud project from local plan
+/pfCloudNew "Name"        # Create with custom name
 ```
 
 ### `/pfWhoami` - Check Authentication Status
@@ -195,18 +198,18 @@ Get your API token at: https://planflow.tools/dashboard/settings/tokens
 /planNew
 
 # 3. Create cloud project and sync
-/pfCloud new
-/pfSync push
+/pfCloudNew
+/pfSyncPush
 
 # 4. Work on tasks
 /planUpdate T1.1 start
 /planUpdate T1.1 done
 
 # 5. Sync progress to cloud
-/pfSync push
+/pfSyncPush
 
 # 6. On another device, pull latest
-/pfSync pull
+/pfSyncPull
 ```
 
 ### Auto-Sync Feature
@@ -214,9 +217,9 @@ Get your API token at: https://planflow.tools/dashboard/settings/tokens
 Enable automatic sync after task updates using the settings command:
 
 ```bash
-/planSettings autoSync on   # Enable auto-sync
-/planSettings autoSync off  # Disable auto-sync
-/planSettings autoSync      # Check current status
+/planSettingsAutoSync on    # Enable auto-sync
+/planSettingsAutoSync off   # Disable auto-sync
+/planSettingsAutoSync       # Check current status
 ```
 
 Or manually in config file:
@@ -237,13 +240,17 @@ Smart merge system for seamless collaboration - work offline, sync when online, 
 
 ### Storage Modes
 
-Configure how your project syncs with the cloud:
+Configure how your project syncs with the cloud in `.plan-config.json`:
 
-```bash
-/planSettings storage local   # Local only, no auto-sync
-/planSettings storage cloud   # Cloud is source of truth
-/planSettings storage hybrid  # Smart merge (recommended)
+```json
+{
+  "cloud": {
+    "storageMode": "hybrid"
+  }
+}
 ```
+
+Options: `local`, `cloud`, `hybrid`
 
 | Mode | Description | Best For |
 |------|-------------|----------|
@@ -311,8 +318,8 @@ Work offline and sync when you're back online:
 ### Hybrid Workflow Example
 
 ```bash
-# 1. Set hybrid mode
-/planSettings storage hybrid
+# 1. Enable auto-sync
+/planSettingsAutoSync on
 
 # 2. Work on tasks
 /planUpdate T1.1 done
@@ -347,7 +354,7 @@ Alternative connection method using Model Context Protocol for native Claude int
 ```bash
 /planNext                # Get next task
 /planUpdate T1.1 done    # Update status
-/pfSync push             # Sync to cloud
+/pfSyncPush              # Sync to cloud
 ```
 
 ### MCP Server (Native Integration)
@@ -431,7 +438,7 @@ npx @planflow-tools/mcp
 
 **Example:**
 ```
-You: /planSettings language
+You: /planSettingsLanguage
 
 Claude: Select your preferred language:
 ○ English
@@ -462,8 +469,8 @@ The plugin supports multiple languages for the complete user experience:
 - ✅ Progress tracking and success messages
 
 **How It Works:**
-1. **Global settings**: `/planSettings language` - Sets language for all projects
-2. **Project-specific settings**: `/planSettings language --local` - Sets language for current project only
+1. **Global settings**: `/planSettingsLanguage` - Sets language for all projects
+2. **Project-specific settings**: `/planSettingsLanguage --local` - Sets language for current project only
 3. Select your preferred language (English, Georgian, etc.)
 4. Language preference is saved and persists across sessions
 
@@ -533,14 +540,25 @@ plan-plugin/
 │   ├── planNew/                 # /planNew wizard
 │   ├── planNext/                # /planNext suggestions
 │   ├── planUpdate/              # /planUpdate status
-│   ├── planExport/              # /planExport formats
-│   ├── planSettings/            # /planSettings configuration
 │   ├── planSpec/                # /planSpec analyzer
-│   ├── pfLogin/                 # /pfLogin - PlanFlow authentication
-│   ├── pfLogout/                # /pfLogout - Clear credentials
-│   ├── pfWhoami/                # /pfWhoami - User info
-│   ├── pfSync/                  # /pfSync - Sync with cloud
-│   └── pfCloud/                 # /pfCloud - Manage projects
+│   ├── planExportGithub/        # /planExportGithub
+│   ├── planExportJson/          # /planExportJson
+│   ├── planExportSummary/       # /planExportSummary
+│   ├── planExportCsv/           # /planExportCsv
+│   ├── planSettingsShow/        # /planSettingsShow
+│   ├── planSettingsLanguage/    # /planSettingsLanguage
+│   ├── planSettingsAutoSync/    # /planSettingsAutoSync
+│   ├── planSettingsReset/       # /planSettingsReset
+│   ├── pfLogin/                 # /pfLogin
+│   ├── pfLogout/                # /pfLogout
+│   ├── pfWhoami/                # /pfWhoami
+│   ├── pfSyncStatus/            # /pfSyncStatus
+│   ├── pfSyncPush/              # /pfSyncPush
+│   ├── pfSyncPull/              # /pfSyncPull
+│   ├── pfCloudList/             # /pfCloudList
+│   ├── pfCloudLink/             # /pfCloudLink
+│   ├── pfCloudUnlink/           # /pfCloudUnlink
+│   └── pfCloudNew/              # /pfCloudNew
 ├── skills/
 │   ├── analyze-codebase/        # Codebase analysis
 │   ├── suggest-breakdown/       # Task breakdown
@@ -583,7 +601,7 @@ claude --plugin-dir ./plan-plugin
 /planUpdate T1.1 done
 
 # 7. Export to GitHub if needed
-/planExport github
+/planExportGithub
 ```
 
 ## 📖 Generated Plan Structure
@@ -707,15 +725,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📝 Development Status
 
-Current Version: **v1.5.0**
+Current Version: **v1.6.0**
 
 - ✅ **v1.0.0**: Core commands, wizard, templates, AI skills
 - ✅ **v1.1.0**: Multi-language support (English, Georgian), hierarchical config
 - ✅ **v1.2.0**: PlanFlow Cloud integration (sync, backup, collaboration)
 - ✅ **v1.3.0**: Hybrid Sync with smart merge, conflict resolution, offline support
 - ✅ **v1.4.0**: MCP Server for native Claude integration (`@planflow-tools/mcp`)
-- ✅ **v1.5.0**: `pf` prefix for cloud commands (`/pfLogin`, `/pfSync`, etc.) - avoids conflicts with Claude
-- 🔜 **v1.6.0**: Integrations (Jira, Linear), time tracking
+- ✅ **v1.5.0**: `pf` prefix for cloud commands (`/pfLogin`, `/pfSync`, etc.)
+- ✅ **v1.6.0**: Single-command format (no arguments) - `/pfSyncPush` instead of `/pfSync push`
+- 🔜 **v1.7.0**: Integrations (Jira, Linear), time tracking
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and [PROJECT_PLAN.md](./PROJECT_PLAN.md) for detailed roadmap.
 

@@ -1,3 +1,8 @@
+---
+name: planUpdate
+description: Plan Update Command
+---
+
 # Plan Update Command
 
 You are a task progress tracking assistant. Your role is to update task statuses in PROJECT_PLAN.md and recalculate progress metrics.
@@ -943,7 +948,7 @@ async function hybridSync(taskId, newLocalStatus, cloudConfig, t) {
       local: { status: newLocalStatus, updatedAt: new Date().toISOString() },
       cloud: { status: cloudStatus, updatedAt: cloudUpdatedAt, updatedBy: cloudUpdatedBy },
       message: t.commands.update.hybridConflictMessage ||
-        `Task ${taskId} was modified on cloud. Use /pfSync to resolve.`
+        `Task ${taskId} was modified on cloud. Use /pfSyncPush to resolve.`
     }
   }
 }
@@ -1129,8 +1134,8 @@ function handleConflict(conflict, t) {
   console.log(`  Cloud:  ${conflict.cloud.status} (by ${conflict.cloud.updatedBy})`)
   console.log("")
   console.log(t.commands.update.hybridConflictHint || "💡 To resolve:")
-  console.log("   /pfSync pull --force   → Keep cloud version")
-  console.log("   /pfSync push --force   → Keep local version")
+  console.log("   /pfSyncPushPull --force   → Keep cloud version")
+  console.log("   /pfSyncPushPush --force   → Keep local version")
   console.log("")
   console.log(t.commands.update.hybridLocalSaved || "📝 Local changes saved to PROJECT_PLAN.md")
 }
@@ -1150,8 +1155,8 @@ Task: T1.2
   Cloud:  BLOCKED (by teammate@example.com)
 
 💡 To resolve:
-   /pfSync pull --force   → Keep cloud version
-   /pfSync push --force   → Keep local version
+   /pfSyncPushPull --force   → Keep cloud version
+   /pfSyncPushPush --force   → Keep local version
 
 📝 Local changes saved to PROJECT_PLAN.md
 ```
@@ -1231,7 +1236,7 @@ Add these to `locales/en.json` and `locales/ka.json`:
       "hybridConflictDetected": "⚠️ Sync Conflict Detected!",
       "hybridConflictHint": "💡 To resolve:",
       "hybridLocalSaved": "📝 Local changes saved to PROJECT_PLAN.md",
-      "hybridConflictMessage": "Task was modified on cloud. Use /pfSync to resolve."
+      "hybridConflictMessage": "Task was modified on cloud. Use /pfSyncPush to resolve."
     }
   }
 }
@@ -1256,7 +1261,7 @@ Add these to `locales/en.json` and `locales/ka.json`:
       "hybridConflictDetected": "⚠️ სინქრონიზაციის კონფლიქტი აღმოჩნდა!",
       "hybridConflictHint": "💡 მოსაგვარებლად:",
       "hybridLocalSaved": "📝 ლოკალური ცვლილებები შენახულია PROJECT_PLAN.md-ში",
-      "hybridConflictMessage": "ამოცანა შეიცვალა ქლაუდში. გამოიყენეთ /pfSync მოსაგვარებლად."
+      "hybridConflictMessage": "ამოცანა შეიცვალა ქლაუდში. გამოიყენეთ /pfSyncPush მოსაგვარებლად."
     }
   }
 }
@@ -1405,7 +1410,7 @@ async function queuePendingSync(taskId, newStatus) {
 
 ### Processing Pending Queue
 
-When back online (e.g., next /update or /pfSync), process pending changes:
+When back online (e.g., next /update or /pfSyncPush), process pending changes:
 
 **Pseudo-code:**
 ```javascript
@@ -1487,7 +1492,7 @@ When operating in offline mode:
    📝 Changes saved locally
    📤 Queued for sync when online (1 pending)
 
-💡 Run /pfSync when back online to push changes
+💡 Run /pfSyncPush when back online to push changes
 
 🎯 Next: /planNext (get recommendation)
 ```
@@ -1505,7 +1510,7 @@ Add to `locales/en.json`:
       "hybridQueueSuccess": "   ✓ {count} pending changes synced",
       "hybridQueueFailed": "   ⚠️ {count} changes failed to sync",
       "hybridQueueConflicts": "   ⚠️ {count} conflicts need resolution",
-      "hybridSyncWhenOnline": "💡 Run /pfSync when back online to push changes"
+      "hybridSyncWhenOnline": "💡 Run /pfSyncPush when back online to push changes"
     }
   }
 }
@@ -1522,7 +1527,7 @@ Add to `locales/ka.json`:
       "hybridQueueSuccess": "   ✓ {count} მოლოდინში მყოფი ცვლილება სინქრონიზდა",
       "hybridQueueFailed": "   ⚠️ {count} ცვლილების სინქრონიზაცია ვერ მოხერხდა",
       "hybridQueueConflicts": "   ⚠️ {count} კონფლიქტი საჭიროებს მოგვარებას",
-      "hybridSyncWhenOnline": "💡 გაუშვით /pfSync როცა ონლაინ იქნებით ცვლილებების ასატვირთად"
+      "hybridSyncWhenOnline": "💡 გაუშვით /pfSyncPush როცა ონლაინ იქნებით ცვლილებების ასატვირთად"
     }
   }
 }
@@ -1643,11 +1648,11 @@ async function syncTaskToCloud(taskId, newStatus, cloudConfig, t) {
     console.log("☁️ ⚠️ Cloud sync failed (local update succeeded)")
 
     if (response.status === 401) {
-      console.log("   Token may be expired. Run /login to re-authenticate.")
+      console.log("   Token may be expired. Run /pfLogin to re-authenticate.")
     } else if (response.status === 404) {
-      console.log("   Task not found on cloud. Run /pfSync push to sync full plan.")
+      console.log("   Task not found on cloud. Run /pfSyncPushPush to sync full plan.")
     } else {
-      console.log("   Try /pfSync push later to manually sync.")
+      console.log("   Try /pfSyncPushPush later to manually sync.")
     }
   }
 }
@@ -1796,7 +1801,7 @@ When `autoSync: false` or not set, no cloud sync message appears:
 
 ☁️ Auto-syncing to cloud...
 ☁️ ⚠️ Cloud sync failed (local update succeeded)
-   Token may be expired. Run /login to re-authenticate.
+   Token may be expired. Run /pfLogin to re-authenticate.
 
 🎯 Next: /planNext (get recommendation)
 ```
@@ -1884,9 +1889,9 @@ Auto-sync should NEVER fail the local update. It's a background enhancement.
 
 | Scenario | Behavior |
 |----------|----------|
-| Network timeout | Show warning, suggest `/pfSync push` later |
-| 401 Unauthorized | Show warning, suggest `/login` |
-| 404 Not Found | Show warning, suggest `/pfSync push` to sync full plan |
+| Network timeout | Show warning, suggest `/pfSyncPushPush` later |
+| 401 Unauthorized | Show warning, suggest `/pfLogin` |
+| 404 Not Found | Show warning, suggest `/pfSyncPushPush` to sync full plan |
 | 500 Server Error | Show warning, suggest retry later |
 | Config missing | Silently skip (not authenticated/linked) |
 
@@ -1903,9 +1908,9 @@ Add these keys to `locales/en.json` and `locales/ka.json`:
       "autoSyncing": "☁️ Auto-syncing to cloud...",
       "autoSyncSuccess": "☁️ ✅ Synced to cloud",
       "autoSyncFailed": "☁️ ⚠️ Cloud sync failed (local update succeeded)",
-      "autoSyncTokenExpired": "   Token may be expired. Run /login to re-authenticate.",
-      "autoSyncTaskNotFound": "   Task not found on cloud. Run /pfSync push to sync full plan.",
-      "autoSyncTryLater": "   Try /pfSync push later to manually sync."
+      "autoSyncTokenExpired": "   Token may be expired. Run /pfLogin to re-authenticate.",
+      "autoSyncTaskNotFound": "   Task not found on cloud. Run /pfSyncPushPush to sync full plan.",
+      "autoSyncTryLater": "   Try /pfSyncPushPush later to manually sync."
     }
   }
 }
@@ -1919,9 +1924,9 @@ Add these keys to `locales/en.json` and `locales/ka.json`:
       "autoSyncing": "☁️ ავტო-სინქრონიზაცია ქლაუდთან...",
       "autoSyncSuccess": "☁️ ✅ სინქრონიზებულია ქლაუდთან",
       "autoSyncFailed": "☁️ ⚠️ ქლაუდ სინქრონიზაცია ვერ მოხერხდა (ლოკალური განახლება წარმატებულია)",
-      "autoSyncTokenExpired": "   ტოკენი შესაძლოა ვადაგასულია. გაუშვით /login ხელახლა ავთენტიფიკაციისთვის.",
-      "autoSyncTaskNotFound": "   ამოცანა ვერ მოიძებნა ქლაუდში. გაუშვით /pfSync push სრული გეგმის სინქრონიზაციისთვის.",
-      "autoSyncTryLater": "   სცადეთ /pfSync push მოგვიანებით ხელით სინქრონიზაციისთვის."
+      "autoSyncTokenExpired": "   ტოკენი შესაძლოა ვადაგასულია. გაუშვით /pfLogin ხელახლა ავთენტიფიკაციისთვის.",
+      "autoSyncTaskNotFound": "   ამოცანა ვერ მოიძებნა ქლაუდში. გაუშვით /pfSyncPushPush სრული გეგმის სინქრონიზაციისთვის.",
+      "autoSyncTryLater": "   სცადეთ /pfSyncPushPush მოგვიანებით ხელით სინქრონიზაციისთვის."
     }
   }
 }
@@ -1973,5 +1978,5 @@ Use the appropriate translation key when displaying auto-sync messages:
 # Config has: autoSync: true, INVALID apiToken, projectId
 /planUpdate T1.1 done
 # Should show "☁️ ⚠️ Cloud sync failed..."
-# With hint about /login
+# With hint about /pfLogin
 ```
