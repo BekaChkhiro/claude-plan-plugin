@@ -84,14 +84,23 @@ jq -n --rawfile plan /tmp/plan_content.txt '{"plan": $plan}' > /tmp/payload.json
 
 **Step 3b: Make API call**
 ```bash
-curl -s -w "\n%{http_code}" -X PUT \
+RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {TOKEN}" \
   -d @/tmp/payload.json \
-  "https://api.planflow.tools/projects/{PROJECT_ID}/plan"
+  "https://api.planflow.tools/projects/{PROJECT_ID}/plan")
+
+# Separate body and status code
+HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+
+echo "HTTP Status: $HTTP_CODE"
+echo "Response: $BODY"
 ```
 
-**Step 3c: Parse response**
+**Step 3c: Parse response - CRITICAL!**
+
+**IMPORTANT**: You MUST parse the JSON response to extract and display the task count!
 
 The API returns:
 ```json
@@ -107,7 +116,21 @@ The API returns:
 }
 ```
 
-Extract `tasksCount`, `completedCount`, and `progress` from response.
+**Use jq or manual parsing to extract values:**
+```bash
+# Extract values from response
+TASKS_COUNT=$(echo "$BODY" | jq -r '.data.tasksCount')
+COMPLETED_COUNT=$(echo "$BODY" | jq -r '.data.completedCount')
+PROGRESS=$(echo "$BODY" | jq -r '.data.progress')
+PROJECT_NAME=$(echo "$BODY" | jq -r '.data.projectName')
+
+echo "Tasks: $TASKS_COUNT, Completed: $COMPLETED_COUNT, Progress: $PROGRESS%"
+```
+
+**You MUST extract and display:**
+- `tasksCount` - Number of tasks parsed from the plan
+- `completedCount` - Number of completed tasks
+- `progress` - Progress percentage (0-100)
 
 **Success output (MUST show task count):**
 ```
