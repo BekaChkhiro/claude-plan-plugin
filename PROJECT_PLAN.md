@@ -66,10 +66,10 @@
 ## Progress Tracking
 
 ### Overall Status
-**Total Tasks**: 61 (27 complete + 34 remaining)
-**Completed**: 27 🟩🟩🟩🟩░░░░░░ (44%)
+**Total Tasks**: 61 (29 complete + 32 remaining)
+**Completed**: 29 🟩🟩🟩🟩🟩░░░░░ (48%)
 **In Progress**: 0
-**TODO**: 35
+**TODO**: 32
 
 ### Phase Progress
 - 🔧 Phase 1: Foundation → 4/4 (100%) ✅
@@ -79,7 +79,7 @@
 - 🧪 Phase 5: Testing & Polish → 2/2 (100%) ✅
 - 🔀 Phase 6: Hybrid Sync → 6/6 (100%) ✅
 - 📚 Phase 7: MCP Documentation → 3/3 (100%) ✅
-- 👥 Phase 8: Team Management → 2/5 (40%)
+- 👥 Phase 8: Team Management → 4/5 (80%)
 - 📋 Phase 9: Task Assignment → 0/6 (0%) 🆕
 - 💬 Phase 10: Comments & Activity → 0/5 (0%) 🆕
 - 🔔 Phase 11: Notifications → 0/5 (0%) 🆕
@@ -952,8 +952,8 @@ Task T1.1: "Setup authentication"
 | ----- | --------------------------------------------- | ---------- | ------ | ------------ |
 | T8.1  | Create /team list command                     | Low        | DONE ✅ | Platform T5.1 |
 | T8.2  | Create /team invite command                   | Medium     | DONE ✅ | Platform T5.2 |
-| T8.3  | Create /team remove command                   | Low        | TODO   | T8.1         |
-| T8.4  | Create /team role command                     | Low        | TODO   | Platform T5.3 |
+| T8.3  | Create /team remove command                   | Low        | DONE ✅ | T8.1         |
+| T8.4  | Create /team role command                     | Low        | DONE ✅ | Platform T5.3 |
 | T8.5  | Add team translations (en.json, ka.json)      | Low        | TODO   | T8.1         |
 
 **Command Examples:**
