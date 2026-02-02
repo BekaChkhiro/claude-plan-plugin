@@ -1,100 +1,163 @@
 # Installation Guide
 
-## Quick Install
+## Quick Install (Recommended)
 
-### Option 1: Clone to Claude Plugins Directory
+Run this single command to install:
 
 ```bash
-# Clone directly to plugins directory
-git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/.config/claude/plugins/plan
-
-# Restart Claude Code
-claude
+curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh | bash
 ```
 
-### Option 2: Manual Download
+This will:
+1. Clone the plugin to `~/.local/share/claude-plan-plugin`
+2. Create symlinks in `~/.claude/commands/`
+3. Make all commands available globally in Claude Code
+
+## Manual Installation
+
+### Option 1: Clone and Link (Best for Development)
 
 ```bash
-# Download and extract
-wget https://github.com/BekaChkhiro/claude-plan-plugin/archive/refs/tags/v1.0.0.zip
-unzip v1.0.0.zip
-mv claude-plan-plugin-1.0.0 ~/.config/claude/plugins/plan
+# Clone to your preferred location
+git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/claude-plan-plugin
 
-# Restart Claude Code
-claude
+# Create commands directory if needed
+mkdir -p ~/.claude/commands
+
+# Create symlinks for each command
+cd ~/claude-plan-plugin/commands
+for cmd in */; do
+    ln -sf "$(pwd)/${cmd%/}" ~/.claude/commands/
+done
 ```
 
-### Option 3: Development Setup
+### Option 2: Download Release
 
 ```bash
-# Clone repository
-git clone https://github.com/BekaChkhiro/claude-plan-plugin.git
-cd claude-plan-plugin
+# Download latest release
+curl -L https://github.com/BekaChkhiro/claude-plan-plugin/archive/refs/heads/master.zip -o plugin.zip
+unzip plugin.zip
+mv claude-plan-plugin-master ~/.local/share/claude-plan-plugin
 
-# Create symlink for auto-updates
-ln -s $(pwd) ~/.config/claude/plugins/plan
-
-# Restart Claude Code
-claude
+# Create symlinks
+mkdir -p ~/.claude/commands
+cd ~/.local/share/claude-plan-plugin/commands
+for cmd in */; do
+    ln -sf "$(pwd)/${cmd%/}" ~/.claude/commands/
+done
 ```
 
 ## Verification
 
-After installation, start Claude Code and run:
-
-```
-/new
-```
-
-If you see the wizard, the plugin is installed correctly!
-
-## Troubleshooting
-
-### Plugin not loading
+After installation, start Claude Code:
 
 ```bash
-# Check plugin exists
-ls -la ~/.config/claude/plugins/plan/.claude-plugin/plugin.json
-
-# Check permissions
-chmod -R 755 ~/.config/claude/plugins/plan
-
-# Try explicit path
-claude --plugin-dir ~/.config/claude/plugins/plan
+claude
 ```
 
-### Commands not working
+Then test with:
+
+```
+/planNew
+```
+
+If you see the project wizard, installation was successful!
+
+## Directory Structure
+
+After installation:
+
+```
+~/.local/share/claude-plan-plugin/    # Plugin source code
+├── commands/
+│   ├── planNew/
+│   ├── planNext/
+│   ├── planUpdate/
+│   └── ...
+├── locales/
+├── templates/
+└── README.md
+
+~/.claude/commands/                    # Symlinks (global commands)
+├── planNew -> ~/.local/share/claude-plan-plugin/commands/planNew
+├── planNext -> ~/.local/share/claude-plan-plugin/commands/planNext
+└── ...
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `/planNew` | Create new project plan with wizard |
+| `/planNext` | Get next task recommendation |
+| `/planUpdate` | Update task status |
+| `/planSpec` | Analyze specification document |
+| `/planExportJson` | Export plan as JSON |
+| `/planExportCsv` | Export tasks as CSV |
+| `/planExportGithub` | Export tasks to GitHub Issues |
+| `/planSettingsShow` | Show current settings |
+| `/planSettingsLanguage` | Change language (en/ka) |
+| `/pfLogin` | Login to PlanFlow cloud |
+| `/pfLogout` | Logout from cloud |
+| `/pfSyncPush` | Push plan to cloud |
+| `/pfSyncPull` | Pull plan from cloud |
+| `/pfCloudLink` | Link project to cloud |
+
+## Updating
 
 ```bash
-# Ensure you're using correct command format
-/new        # ✅ Correct
-plan:new         # ❌ Missing slash
-/plan new        # ❌ Space instead of colon
+# If installed with install.sh
+cd ~/.local/share/claude-plan-plugin
+git pull origin master
+
+# If cloned manually
+cd /path/to/claude-plan-plugin
+git pull origin master
 ```
 
 ## Uninstallation
 
 ```bash
-# Remove plugin
-rm -rf ~/.config/claude/plugins/plan
+# Remove symlinks
+rm -rf ~/.claude/commands/plan*
+rm -rf ~/.claude/commands/pf*
 
-# Restart Claude Code
+# Remove plugin source
+rm -rf ~/.local/share/claude-plan-plugin
 ```
 
-## Updates
+## Troubleshooting
+
+### Commands not showing
+
+1. Check symlinks exist:
+   ```bash
+   ls -la ~/.claude/commands/
+   ```
+
+2. Verify symlinks point to correct location:
+   ```bash
+   readlink ~/.claude/commands/planNew
+   ```
+
+3. Restart Claude Code
+
+### Permission denied
 
 ```bash
-# Pull latest changes
-cd ~/.config/claude/plugins/plan
-git pull origin master
+chmod +x ~/.local/share/claude-plan-plugin/install.sh
+```
 
-# Or if using symlink, update source
-cd /path/to/development/claude-plan-plugin
-git pull origin master
+### Symlink broken
+
+```bash
+# Remove and recreate
+rm ~/.claude/commands/planNew
+ln -s ~/.local/share/claude-plan-plugin/commands/planNew ~/.claude/commands/
 ```
 
 ## Support
 
 - 📖 Documentation: [README.md](README.md)
 - 🐛 Issues: [GitHub Issues](https://github.com/BekaChkhiro/claude-plan-plugin/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/BekaChkhiro/claude-plan-plugin/discussions)
+- 🌐 Web Dashboard: [planflow.tools](https://planflow.tools)

@@ -20,22 +20,25 @@ Starting a large project can be overwhelming. This plugin solves that by providi
 curl -fsSL https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh | bash
 ```
 
-Or download and run:
-
-```bash
-wget https://raw.githubusercontent.com/BekaChkhiro/claude-plan-plugin/master/install.sh
-chmod +x install.sh
-./install.sh
-```
+This will:
+1. Clone the plugin to `~/.local/share/claude-plan-plugin`
+2. Create symlinks in `~/.claude/commands/`
+3. Make all commands available globally in Claude Code
 
 ### Manual Installation
 
 ```bash
-# Clone to plugins directory
-git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/.config/claude/plugins/plan
+# Clone to your preferred location
+git clone https://github.com/BekaChkhiro/claude-plan-plugin.git ~/claude-plan-plugin
 
-# Start Claude Code
-claude
+# Create commands directory
+mkdir -p ~/.claude/commands
+
+# Create symlinks for all commands
+cd ~/claude-plan-plugin/commands
+for cmd in */; do
+    ln -sf "$(pwd)/${cmd%/}" ~/.claude/commands/
+done
 ```
 
 ### Verification

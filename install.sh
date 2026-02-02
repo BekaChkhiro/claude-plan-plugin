@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Plan Plugin Installation Script
-# Automatically installs claude-plan-plugin to Claude Code plugins directory
+# Plan Plugin Installation Script for Claude Code
+# Creates symlinks to ~/.claude/commands/ for global access
 
 set -e
 
@@ -12,83 +12,120 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}═══════════════════════════════════════${NC}"
-echo -e "${BLUE}   Plan Plugin Installation Script${NC}"
-echo -e "${BLUE}═══════════════════════════════════════${NC}"
+echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
+echo -e "${BLUE}   PlanFlow Plugin Installation Script v1.5.1  ${NC}"
+echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
 echo ""
 
 # Check if git is installed
 if ! command -v git &> /dev/null; then
     echo -e "${RED}Error: git is not installed${NC}"
-    echo "Please install git first: sudo apt install git"
+    echo "Please install git first"
     exit 1
 fi
 
-# Create plugins directory if it doesn't exist
-PLUGINS_DIR="$HOME/.config/claude/plugins"
-mkdir -p "$PLUGINS_DIR"
+# Determine installation directory
+INSTALL_DIR="$HOME/.local/share/claude-plan-plugin"
+COMMANDS_DIR="$HOME/.claude/commands"
 
-echo -e "${YELLOW}Installing to: ${PLUGINS_DIR}/plan${NC}"
+# Create directories
+mkdir -p "$INSTALL_DIR"
+mkdir -p "$COMMANDS_DIR"
+
+echo -e "${YELLOW}Installation directory: ${INSTALL_DIR}${NC}"
+echo -e "${YELLOW}Commands directory: ${COMMANDS_DIR}${NC}"
 echo ""
 
-# Check if plugin already exists
-if [ -d "$PLUGINS_DIR/plan" ]; then
-    echo -e "${YELLOW}Plugin already exists. What would you like to do?${NC}"
-    echo "1) Update existing installation"
-    echo "2) Remove and reinstall"
-    echo "3) Cancel"
-    read -p "Enter choice [1-3]: " choice
-
-    case $choice in
-        1)
-            echo -e "${BLUE}Updating plugin...${NC}"
-            cd "$PLUGINS_DIR/plan"
-            git pull origin master
-            echo -e "${GREEN}✓ Plugin updated successfully!${NC}"
-            ;;
-        2)
-            echo -e "${BLUE}Removing old installation...${NC}"
-            rm -rf "$PLUGINS_DIR/plan"
-            echo -e "${BLUE}Installing fresh copy...${NC}"
-            git clone https://github.com/BekaChkhiro/claude-plan-plugin.git "$PLUGINS_DIR/plan"
-            echo -e "${GREEN}✓ Plugin reinstalled successfully!${NC}"
-            ;;
-        3)
-            echo "Installation cancelled."
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid choice. Exiting.${NC}"
-            exit 1
-            ;;
-    esac
+# Check if already installed
+if [ -d "$INSTALL_DIR/.git" ]; then
+    echo -e "${YELLOW}Plugin already installed. Updating...${NC}"
+    cd "$INSTALL_DIR"
+    git pull origin master
+    echo -e "${GREEN}✓ Plugin updated!${NC}"
 else
     # Fresh installation
     echo -e "${BLUE}Cloning plugin repository...${NC}"
-    git clone https://github.com/BekaChkhiro/claude-plan-plugin.git "$PLUGINS_DIR/plan"
-    echo -e "${GREEN}✓ Plugin cloned successfully!${NC}"
+    rm -rf "$INSTALL_DIR"
+    git clone https://github.com/BekaChkhiro/claude-plan-plugin.git "$INSTALL_DIR"
+    echo -e "${GREEN}✓ Plugin cloned!${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}═══════════════════════════════════════${NC}"
-echo -e "${GREEN}   Installation Complete! 🎉${NC}"
-echo -e "${GREEN}═══════════════════════════════════════${NC}"
+echo -e "${BLUE}Creating command symlinks...${NC}"
+
+# List of commands to link
+COMMANDS=(
+    "planNew"
+    "planNext"
+    "planUpdate"
+    "planSpec"
+    "planExportJson"
+    "planExportCsv"
+    "planExportGithub"
+    "planExportSummary"
+    "planSettingsShow"
+    "planSettingsReset"
+    "planSettingsLanguage"
+    "planSettingsAutoSync"
+    "pfLogin"
+    "pfLogout"
+    "pfWhoami"
+    "pfSyncPush"
+    "pfSyncPull"
+    "pfSyncStatus"
+    "pfCloudNew"
+    "pfCloudList"
+    "pfCloudLink"
+    "pfCloudUnlink"
+    "pfTeamInvite"
+    "pfTeamList"
+)
+
+# Create symlinks
+linked=0
+for cmd in "${COMMANDS[@]}"; do
+    source_path="$INSTALL_DIR/commands/$cmd"
+    target_path="$COMMANDS_DIR/$cmd"
+
+    if [ -d "$source_path" ]; then
+        # Remove existing symlink or directory
+        rm -rf "$target_path"
+        # Create symlink
+        ln -s "$source_path" "$target_path"
+        echo -e "  ${GREEN}✓${NC} $cmd"
+        ((linked++))
+    fi
+done
+
 echo ""
-echo -e "${BLUE}Next steps:${NC}"
-echo "1. Start Claude Code:"
-echo "   ${YELLOW}claude${NC}"
+echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
+echo -e "${GREEN}   Installation Complete! 🎉 ($linked commands)  ${NC}"
+echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
 echo ""
-echo "2. Create your first project plan:"
-echo "   ${YELLOW}/plan:new${NC}"
+echo -e "${BLUE}Getting Started:${NC}"
 echo ""
-echo "3. Get help:"
-echo "   ${YELLOW}cat ~/.config/claude/plugins/plan/README.md${NC}"
+echo "  1. Start Claude Code in any project:"
+echo -e "     ${YELLOW}claude${NC}"
 echo ""
-echo -e "${BLUE}Available commands:${NC}"
-echo "  • /plan:new     - Create new project plan"
-echo "  • /plan:next    - Get next task recommendation"
-echo "  • /plan:update  - Update task status"
-echo "  • /plan:export  - Export plan to various formats"
+echo "  2. Create your first project plan:"
+echo -e "     ${YELLOW}/planNew${NC}"
+echo ""
+echo "  3. Get next task recommendation:"
+echo -e "     ${YELLOW}/planNext${NC}"
+echo ""
+echo -e "${BLUE}Cloud Sync Commands:${NC}"
+echo ""
+echo "  • /pfLogin          - Login to PlanFlow cloud"
+echo "  • /pfSyncPush       - Push plan to cloud"
+echo "  • /pfSyncPull       - Pull plan from cloud"
+echo ""
+echo -e "${BLUE}All Commands:${NC}"
+echo ""
+echo "  Planning:    /planNew, /planNext, /planUpdate, /planSpec"
+echo "  Export:      /planExportJson, /planExportCsv, /planExportGithub"
+echo "  Settings:    /planSettingsShow, /planSettingsLanguage"
+echo "  Cloud:       /pfLogin, /pfSyncPush, /pfSyncPull, /pfCloudLink"
 echo ""
 echo -e "${BLUE}Documentation:${NC} https://github.com/BekaChkhiro/claude-plan-plugin"
+echo -e "${BLUE}PlanFlow Web:${NC}  https://planflow.tools"
 echo ""
